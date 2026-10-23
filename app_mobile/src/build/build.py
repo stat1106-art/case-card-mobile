@@ -23,6 +23,14 @@ cp(KIT / 'casecard/design/standard.css', 'design/standard.css')
 # 案例來源資料夾：預設用本包的 cases/；要加案例就把檔案和 index.json 放進去再重新打包（也可用 --cases 指定別的資料夾）
 CASES = Path(sys.argv[sys.argv.index('--cases') + 1]) if '--cases' in sys.argv else KIT / 'cases'
 for p in sorted(CASES.glob('*.json')): cp(p, 'cases/' + p.name)
+# 放上網站的案例檔，自然人姓名一律先遮成「姓＋○○」（例如「羅○○」、複姓「歐陽○○」）再存；沒遮就停止打包
+import re as _re
+for p in sorted(CASES.glob('*.json')):
+    try: parties = (json.loads(p.read_text(encoding='utf-8')).get('card') or {}).get('parties') or {}
+    except Exception: continue   # 壞掉的案例檔由 App 標示「讀不出來」
+    for who in parties.values():
+        if isinstance(who, dict) and who.get('natural_person') and not _re.fullmatch(r'[^○〇]{1,2}[○〇]{1,3}', str(who.get('name', ''))):
+            raise SystemExit(f'{p.name} 的自然人姓名沒有遮好：{who.get("name")!r}（要寫成「羅○○」這種格式）')
 
 # ── 右上角的圖 ──
 # SVG 插畫照舊全收；每案專屬圖（card.hero.image）只收案例有用到的，事故類型圖（type_*）全收，預設照片一定收；
