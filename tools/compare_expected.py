@@ -30,14 +30,16 @@ def main():
         for x, y, w, h, _ in masks.get(exp.name, []):
             for im in (a, b):
                 ImageDraw.Draw(im).rectangle([x, y, x + w - 1, y + h - 1], fill=(0, 0, 0))
-        diff = ImageChops.difference(a, b).convert("L").point(lambda v: 255 if v > 32 else 0)
+        raw = ImageChops.difference(a, b)
+        exact = raw.getbbox() is None
+        diff = raw.convert("L").point(lambda v: 255 if v > 32 else 0)
         n = diff.histogram()[255]
         note = "（已排除：" + "、".join(m[4] for m in masks[exp.name]) + "）" if exp.name in masks else ""
         if n:
             failed += 1
             print(f"不同 {exp.name}：{n} 點，範圍 {diff.getbbox()}{note}")
         else:
-            print(f"一致 {exp.name}{note}")
+            print(f"一致 {exp.name}{note}" + ("（逐點完全相同）" if exact else "（有極小色差，都在容許範圍內）"))
     print("全部一致" if not failed else f"{failed} 張不一致")
     return 1 if failed else 0
 
