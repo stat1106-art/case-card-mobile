@@ -1,0 +1,9 @@
+{"id":"style7","name":"橘灰斜角",
+ "bg":{"type":"hgrad","center":"F2F2F2","edge":"D4D4D4","edge_width":0.12,
+   "corners":{"color":"333333","w":0.95,"h":0.55}},
+ "colors":{"dk1":"262626","lt1":"FFFFFF","dk2":"3A3A3A","lt2":"F2F2F2",
+   "accent1":"C96F00","accent2":"6E6E6E","accent3":"666666","accent4":"D0D0D0","accent5":"F9C06A","accent6":"FF9900",
+   "hlink":"C96F00","folHlink":"6E6E6E"},
+ "title":{"size":30,"bold":true,"color":"tx1"},
+ "subtitle":{"size":13,"color":"accent3"},
+ "decor":{"corners":true,"section_full":true}}

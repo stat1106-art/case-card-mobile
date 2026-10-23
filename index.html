@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="職災小卡">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f4f4f2">
+<title>職災小卡</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<main id="app">
+<h1>職災小卡</h1>
+<section>
+<h2>1. 選案例</h2>
+<div id="cases"></div>
+<button id="reload" type="button" class="sub">重新讀取</button>
+</section>
+<section>
+<h2>2. 選版型、選風格</h2>
+<label class="field">版型：<select id="tpl"></select></label>
+<label class="field">風格：<select id="skin"></select></label>
+<p id="skinnote" class="note"></p>
+</section>
+<section>
+<h2>3. 草稿標記</h2>
+<label class="check"><input type="checkbox" id="draft" checked> 圖右上角加上「草稿」</label>
+<p class="note" id="disc"></p>
+</section>
+<button id="go" type="button" class="main">產生小卡</button>
+<div id="msg" class="note">請先在上面選案例，再按「產生小卡」。</div>
+<div id="result"></div>
+<div id="picwrap" hidden>
+<img id="pic" alt="小卡">
+<button id="save" type="button" class="main">存到照片</button>
+</div>
+<p id="ver" class="ver"></p>
+</main>
+<div id="full" hidden>
+<p class="hint">長按圖片 → 加入照片</p>
+<img id="fullpic" alt="小卡">
+<button id="closefull" type="button" class="sub">關閉</button>
+</div>
+<div id="stage" aria-hidden="true"></div>
+<script src="js/engine.js"></script>
+<script src="js/render.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
