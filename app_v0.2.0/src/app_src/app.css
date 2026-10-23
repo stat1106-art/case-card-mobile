@@ -1,0 +1,30 @@
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:#f4f4f2;color:#222;font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;overflow-x:hidden}
+#app{max-width:640px;margin:0 auto;padding:calc(12px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom))}
+h1{font-size:22px;margin:4px 0 12px}
+h2{font-size:17px;margin:18px 0 8px}
+section{background:#fff;border:1px solid #ddd;border-radius:10px;padding:4px 12px 12px;margin-bottom:10px}
+.case{display:flex;align-items:center;gap:10px;min-height:48px;padding:6px 2px;border-bottom:1px solid #eee;font-size:16px;word-break:break-word}
+.case input{width:22px;height:22px;flex:none}
+.bad{color:#b00020}
+.field{display:flex;align-items:center;gap:8px;font-size:16px;margin:8px 0}
+select{flex:1;min-width:0;font-size:16px;min-height:44px;padding:4px 8px;border:1px solid #bbb;border-radius:8px;background:#fff;color:#222}
+select:disabled{background:#e4e4e4;color:#888}
+.check{display:flex;align-items:center;gap:10px;min-height:44px;font-size:16px}
+.check input{width:24px;height:24px;flex:none}
+button{font-size:17px;min-height:48px;border-radius:10px;border:1px solid #888;background:#fff;color:#222;padding:8px 16px;cursor:pointer}
+button.main{display:block;width:100%;background:#1f5fbf;border-color:#1f5fbf;color:#fff;font-weight:600;margin:10px 0}
+button.sub{margin-top:8px}
+button:disabled{opacity:.5}
+.note{color:#555;font-size:15px;margin:8px 0}
+.warn{background:#fff3cd;padding:10px;border:1px solid #e0c060;border-radius:8px;margin:8px 0;font-size:15px}
+.warn ul{margin:6px 0;padding-left:22px}
+.okmsg{background:#e6f4ea;padding:10px;border:1px solid #8bc59b;border-radius:8px;margin:8px 0;font-size:15px}
+#pic{display:block;width:100%;height:auto;border:1px solid #ccc;background:#fff}
+.ver{color:#888;font-size:13px;text-align:center;margin-top:20px}
+#full{position:fixed;inset:0;background:#000;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(8px + env(safe-area-inset-top)) 8px calc(8px + env(safe-area-inset-bottom))}
+#full[hidden]{display:none}
+#full .hint{color:#fff;font-size:18px;margin:4px 0 8px}
+#fullpic{max-width:100%;max-height:calc(100% - 120px);object-fit:contain;-webkit-touch-callout:default}
+#stage{position:fixed;left:0;top:0;width:0;height:0;overflow:hidden;pointer-events:none}
