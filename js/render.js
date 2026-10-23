@@ -162,20 +162,26 @@ async function renderCard(opts) {
   usedFiles.add('BarlowCondensed-Bold.woff2'); usedFiles.add('BarlowCondensed-ExtraBold.woff2');
   const b64 = {}; for (const f of usedFiles) b64[f] = await toB64(fontUrl(f));
   let svgHtml = swapFonts(prep.html, f => b64[f] ? 'data:font/woff2;base64,' + b64[f] : 'data:font/woff2;base64,', '');
-  // 原版右上的圖（照片或示意圖）不嵌進 SVG：Safari 存圖時不畫 SVG 裡用 <img> 放進來的圖（右上會空白）。
-  // 改成版面上留同樣大小的空位，整張畫完後再把圖直接畫到畫布的那一格；草稿標記原本壓在圖上，最後再單獨疊一次。
-  let hero = null, badgeImg = null;
-  if (assets.heroPhotoUrl && !assets.heroPhotoUrl.startsWith('data:')) {
+  // 右上角的圖（原版的照片／插畫、各版型的每案情境圖）不嵌進 SVG：Safari 存圖時不畫 SVG 裡用 <img> 放進來的圖。
+  // 改成版面上留同大小的空位，整張畫完後再把圖直接畫到畫布的那一格；原本壓在圖上的東西（草稿標記、「示意圖」標籤）最後再單獨疊一次。
+  let hero = null, topImg = null, onTop = '#draftbadge';
+  if (assets.heroImageUrl) {                       // 新第一版、淺色版：空位 #hero-slot 填滿右上那一格
+    const slot = doc.getElementById('hero-slot');
+    if (!slot) throw new Error('找不到右上的圖的位置');
+    const rc = slot.getBoundingClientRect();
+    hero = { img: await loadImage(assets.heroImageUrl), x: rc.left, y: rc.top, w: rc.width, h: rc.height };
+    onTop = '#hero-slot ~ *';                       // 同一格裡排在圖後面的：標籤、草稿標記
+  } else if (assets.heroPhotoUrl && !assets.heroPhotoUrl.startsWith('data:')) {   // 原版：img.hero
     const tag = `<img class="hero" src="${assets.heroPhotoUrl}" alt="">`;
-    if (!svgHtml.includes(tag)) throw new Error('找不到原版右上的圖的位置');
+    if (!svgHtml.includes(tag)) throw new Error('找不到右上的圖的位置');
     const rc = doc.querySelector('img.hero').getBoundingClientRect();
     hero = { img: await loadImage(assets.heroPhotoUrl), x: rc.left, y: rc.top, w: rc.width, h: rc.height };
     svgHtml = svgHtml.split(tag).join('<div class="hero"></div>');
-    if (doc.getElementById('draftbadge')) {
-      // 只留草稿標記、其他全部隱形（版面位置不變）、底色透明
-      const only = '<style>html,body,#card,.head{background:transparent!important}body *{visibility:hidden!important}#draftbadge,#draftbadge *{visibility:visible!important}</style>';
-      badgeImg = await svgImage(svgHtml.replace('</head>', only + '</head>'));
-    }
+  }
+  if (hero && doc.querySelector(onTop)) {
+    // 只留壓在圖上的東西、其他全部隱形（版面位置不變）、底色透明；畫的時候再限制在那一格裡
+    const only = `<style>html,body,#card,.head{background:transparent!important}body *{visibility:hidden!important}${onTop},${onTop} *{visibility:visible!important}</style>`;
+    topImg = await svgImage(svgHtml.replace('</head>', only + '</head>'));
   }
   const img = await svgImage(svgHtml);
   const cv = document.createElement('canvas'); cv.width = EN.W; cv.height = EN.H;
@@ -185,7 +191,7 @@ async function renderCard(opts) {
   for (let i = 0; i < 8; i++) {
     ctx.clearRect(0, 0, EN.W, EN.H); ctx.drawImage(img, 0, 0, EN.W, EN.H);
     if (hero) drawCover(ctx, hero);
-    if (badgeImg) ctx.drawImage(badgeImg, 0, 0, EN.W, EN.H);
+    if (topImg) { ctx.save(); ctx.beginPath(); ctx.rect(hero.x, hero.y, hero.w, hero.h); ctx.clip(); ctx.drawImage(topImg, 0, 0, EN.W, EN.H); ctx.restore(); }
     const d = ctx.getImageData(0, 0, EN.W, EN.H).data;
     let h = 0; for (let j = 0; j < d.length; j += 397) h = (h * 31 + d[j]) | 0;
     if (prev !== null && h === prev && i >= 2) break;
