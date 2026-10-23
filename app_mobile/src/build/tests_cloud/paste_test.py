@@ -26,8 +26,9 @@ def gen(pg, t, s="original", name=None):
     if name: (out / name).write_bytes(base64.b64decode(pg.evaluate(B64)))
     return res
 def hero_same(png, ref_img):
-    box = Image.open(png).convert("RGB").crop((577, 0, 1080, 290))
-    return sum(ImageChops.difference(box, ref_img).convert("L").histogram()[:13]) / (503 * 290) * 100
+    # 只比資訊列以上（y < 262）：新第一版的資訊列本來就壓在那一格下緣
+    box = Image.open(png).convert("RGB").crop((577, 0, 1080, 262))
+    return sum(ImageChops.difference(box, ref_img.crop((0, 0, 503, 262))).convert("L").histogram()[:13]) / (503 * 262) * 100
 try:
     with sync_playwright() as p:
         b = p.chromium.launch()
