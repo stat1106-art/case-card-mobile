@@ -25,7 +25,7 @@ CASES = Path(sys.argv[sys.argv.index('--cases') + 1]) if '--cases' in sys.argv e
 for p in sorted(CASES.glob('*.json')): cp(p, 'cases/' + p.name)
 
 # ── 右上角的圖 ──
-# SVG 插畫照舊全收；照片（card.hero.photo，原版用）與每案情境圖（card.hero.image，三個版型都用）只收案例有用到的，
+# SVG 插畫照舊全收；每案專屬圖（card.hero.image）只收案例有用到的，事故類型圖（type_*）全收，預設照片一定收；
 # 而且每張都要有同名 .provenance.json 且寫了發包人核准日期，否則停止打包（不准放進網站）。
 # 情境圖先置中裁成右上那一格的比例（503×290）、存成 JPEG（檔名＝原檔名主檔名＋.card.jpg，app.js 用同一規則找檔）。
 HERO_W, HERO_H = 503, 290
@@ -51,29 +51,35 @@ used = {}
 for p in sorted(CASES.glob('*.json')):
     try: hero = (json.loads(p.read_text(encoding='utf-8')).get('card') or {}).get('hero') or {}
     except Exception: continue   # 壞掉的案例檔由 App 標示「讀不出來」
-    if hero.get('photo') and not hero.get('image'): used[('photo', hero['photo'])] = p.name   # 有情境圖時照片用不到，不收
+    # 舊的 hero.photo 欄位不再收：沒有專屬圖時改用事故類型圖，最後一層是一定會放的預設照片（app.js 的 DEFAULT_PHOTO）
     if hero.get('image'): used[('image', hero['image'])] = p.name
+# 事故類型圖庫：hero_library/type_<類型>.png｜.jpg｜.webp（案例 card.hero.hero_type 選類型，app.js 找 type_<類型>.card.jpg）
+# 只認這 8 類；檔名是 type_ 開頭卻不是這 8 類就停止（避免放進沒人管的圖）。來源紀錄要有 type、author、date、approved_date。
+HERO_TYPES = ['overwork', 'fall', 'machine', 'traffic', 'chemical', 'electric', 'collapse', 'commute']
+for src in sorted((KIT / 'hero_library').glob('type_*')):
+    if src.name.endswith('.provenance.json'): continue
+    t = src.name[5:].rsplit('.', 1)[0]
+    if t not in HERO_TYPES: raise SystemExit(f'類型圖 {src.name} 的類型不是這 8 類之一：{"、".join(HERO_TYPES)}')
+    used[('type', src.name)] = t
 # App 找不到案例的圖時（例如貼上的案例）原版改用這張預設照片（app.js 的 DEFAULT_PHOTO），所以一定要放
 used.setdefault(('image', 'overwork_night_desk_photo.png'), '（預設圖）')
 for (kind, name), case_file in sorted(used.items()):
     src = hero_src(name)
-    if kind == 'photo':
-        pv = provenance(src, ['approved_date'])
-        cp(src, 'hero_library/' + name)
-    else:
-        if src.suffix.lower() not in ('.png', '.jpg', '.jpeg', '.webp'): raise SystemExit(f'情境圖只收 png／jpg／webp：{name}')
-        pv = provenance(src, ['case', 'author', 'date', 'approved_date'])
-        im = Image.open(src).convert('RGB')
-        r = HERO_W / HERO_H
-        if im.width / im.height > r: w = round(im.height * r); im = im.crop(((im.width - w) // 2, 0, (im.width - w) // 2 + w, im.height))
-        else: h = round(im.width / r); im = im.crop((0, (im.height - h) // 2, im.width, (im.height - h) // 2 + h))
-        im = im.resize((HERO_W, HERO_H), Image.LANCZOS)
-        dst = out / 'hero_library' / card_name(name); dst.parent.mkdir(parents=True, exist_ok=True)
-        for q in (85, 75, 65):
-            im.save(dst, 'JPEG', quality=q, optimize=True, progressive=False)
-            if dst.stat().st_size <= HERO_MAX_BYTES: break
-        else: raise SystemExit(f'{name} 壓到品質 65 仍超過 {HERO_MAX_BYTES // 1000}KB')
-        print(f'情境圖 {name} → {dst.name}（{dst.stat().st_size // 1000}KB，{case_file}）')
+    if src.suffix.lower() not in ('.png', '.jpg', '.jpeg', '.webp'): raise SystemExit(f'情境圖只收 png／jpg／webp：{name}')
+    pv = provenance(src, ['type', 'author', 'date', 'approved_date'] if kind == 'type' else ['case', 'author', 'date', 'approved_date'])
+    if kind == 'type' and json.loads(pv.read_text(encoding='utf-8')).get('type') != case_file:
+        raise SystemExit(f'{pv.name} 的 type 要寫 {case_file}')
+    im = Image.open(src).convert('RGB')
+    r = HERO_W / HERO_H
+    if im.width / im.height > r: w = round(im.height * r); im = im.crop(((im.width - w) // 2, 0, (im.width - w) // 2 + w, im.height))
+    else: h = round(im.width / r); im = im.crop((0, (im.height - h) // 2, im.width, (im.height - h) // 2 + h))
+    im = im.resize((HERO_W, HERO_H), Image.LANCZOS)
+    dst = out / 'hero_library' / card_name(name); dst.parent.mkdir(parents=True, exist_ok=True)
+    for q in (85, 75, 65):
+        im.save(dst, 'JPEG', quality=q, optimize=True, progressive=False)
+        if dst.stat().st_size <= HERO_MAX_BYTES: break
+    else: raise SystemExit(f'{name} 壓到品質 65 仍超過 {HERO_MAX_BYTES // 1000}KB')
+    print(f'情境圖 {name} → {dst.name}（{dst.stat().st_size // 1000}KB，{case_file}）')
     cp(pv, 'hero_library/' + pv.name)
 for p in sorted(FONTS.iterdir()): cp(p, 'fonts/' + p.name)
 for n in ('OFL.txt', 'FONTS_LICENSE.md'): cp(KIT / 'casecard/assets/fonts' / n, 'fonts/' + n)
