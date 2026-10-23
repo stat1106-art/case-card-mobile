@@ -124,8 +124,16 @@ async function renderCard(opts) {
   const b64 = {}; for (const f of usedFiles) b64[f] = await toB64(fontUrl(f));
   let svgHtml = swapFonts(prep.html, f => b64[f] ? 'data:font/woff2;base64,' + b64[f] : 'data:font/woff2;base64,', '');
   if (assets.heroPhotoUrl && !assets.heroPhotoUrl.startsWith('data:')) {
-    const heroType = /\.svg$/i.test(assets.heroPhotoUrl) ? 'image/svg+xml' : 'image/png';
-    svgHtml = svgHtml.split(`src="${assets.heroPhotoUrl}"`).join(`src="data:${heroType};base64,${await toB64(assets.heroPhotoUrl)}"`);
+    // Safari 存圖時不畫用 <img> 放進來的圖（PNG、SVG 都一樣，右上會空白）；新第一版、淺色版直接寫進版面的 SVG 則畫得出來。
+    // 所以 SVG 示意圖改成直接寫進版面（框的大小、位置照原本 img.hero 的樣式）。
+    const tag = `<img class="hero" src="${assets.heroPhotoUrl}" alt="">`;
+    if (!svgHtml.includes(tag)) throw new Error('找不到原版右上的示意圖位置');
+    if (/\.svg$/i.test(assets.heroPhotoUrl)) {
+      const svgText = await (await fetch(assets.heroPhotoUrl)).text();
+      svgHtml = svgHtml.split(tag).join(`<div class="hero" style="overflow:hidden">${svgText}</div>`);
+    } else {
+      svgHtml = svgHtml.split(`src="${assets.heroPhotoUrl}"`).join(`src="data:image/png;base64,${await toB64(assets.heroPhotoUrl)}"`);
+    }
   }
   const pdoc = new DOMParser().parseFromString(svgHtml, 'text/html');
   const xhtml = new XMLSerializer().serializeToString(pdoc.documentElement);
