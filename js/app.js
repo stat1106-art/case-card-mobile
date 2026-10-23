@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 const APP_VERSION = '0.3.0';
-const BUILD = 'dd3d57424b';
+const BUILD = '265a3128e3';
 // 壞檔在清單上的標示（驗收第 10 條的用字）；要換字只改這裡
 const BROKEN_LABEL = '這個案例讀不出來';
 const DISCLAIMER = '案例內容由 AI 整理，正式使用前請自己對照判決核對。';
@@ -31,6 +31,10 @@ const PASTE_TAG = '（貼上）';
 // 找不到圖時的預設圖：原版用 r9 照片（打包時一定會放、已裁好），新第一版與淺色用 SVG 插畫
 const DEFAULT_PHOTO = 'hero_library/overwork_night_desk_photo.card.jpg';
 const DEFAULT_SVG = 'hero_library/overwork_night_desk.svg';
+// 事故類型圖庫（案例 card.hero.hero_type）；沒有對應的類型圖時用 overwork，並在畫面註明
+const HERO_TYPES = ['overwork', 'fall', 'machine', 'traffic', 'chemical', 'electric', 'collapse', 'commute'];
+const HERO_FALLBACK_TYPE = 'overwork';
+const HERO_NOT_SET = '示意圖尚未配置';
 // 新第一版、淺色版放情境圖時，SVG 插畫的位置換成這個空位（填滿右上那一格），存圖時再把圖疊上去
 const HERO_SLOT = '<div id="hero-slot" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%"></div>';
 const $ = id => document.getElementById(id);
@@ -70,13 +74,13 @@ function extractJson(text) {
 function okCase(d) { return d && typeof d === 'object' && !Array.isArray(d) && d.card && typeof d.card === 'object' && !Array.isArray(d.card) && d.source && typeof d.source === 'object' && !Array.isArray(d.source); }
 // 圖檔名只取檔名本身（貼上的資料可能寫了路徑或奇怪字元）
 function safeName(n) { return encodeURIComponent(String(n).split(/[\\/]/).pop()); }
-// 依序試，回傳第一個抓得到的路徑；都抓不到就回傳最後一個（預設圖）
-async function firstOk(paths) {
+// 依序試，回傳第一個抓得到的路徑；都抓不到就回傳最後一個（預設圖）；strict 時都抓不到回傳空字串
+async function firstOk(paths, strict) {
   const list = paths.filter(Boolean);
   for (const p of list) {
     try { const r = await fetch(BASE + p); if (r.ok) return p; } catch (e) { /* 沒網路又不在快取裡 */ }
   }
-  return list[list.length - 1] || '';
+  return strict ? '' : list[list.length - 1] || '';
 }
 function stem(f) { return f.replace(/\.json$/i, ''); }
 
@@ -184,18 +188,23 @@ async function generate() {
   const c = allCases().find(x => x.file === sel.value);
   if (!c || !c.ok) { $('msg').textContent = MSG.badFile; return; }
   $('msg').textContent = MSG.busy; clearResult(); $('go').disabled = true;
+  let heroNote = '';
   try {
     let res;
     try {
       const hero = (c.data.card && c.data.card.hero) || {};
       const assets = { standardCss: await getText('design/standard.css') };
-      // 右上角的圖：有每案情境圖（hero.image）就三個版型都用它；沒有就照舊：
-      // 原版用照片（hero.photo），新第一版、淺色版用 SVG 插畫（hero.file）。
-      // 情境圖打包時已裁好、存成「主檔名.card.jpg」（build.py 的 card_name）。
-      // 圖檔不在網站裡（例如貼上的案例）就改用預設圖：原版 r9 照片、新第一版與淺色 SVG 插畫。缺圖不能讓小卡出不來。
-      const image = hero.image ? await firstOk(['hero_library/' + safeName(hero.image).replace(/\.[^.]+$/, '') + '.card.jpg']) : '';
+      // 右上角的圖（三個版型都一樣）：該案專屬圖 → 事故類型圖 → overwork 類型圖 → 預設圖（原版 r9 照片、新第一版與淺色 SVG 插畫）。
+      // 圖打包時已裁好、存成「主檔名.card.jpg」（build.py 的 card_name）。缺圖不能讓小卡出不來。
+      // 順序：該案專屬圖（hero.image）→ 事故類型圖（hero.hero_type）→ overwork 類型圖（註明「示意圖尚未配置」）→ 舊的預設圖（同上註明）
+      const own = hero.image ? await firstOk(['hero_library/' + safeName(hero.image).replace(/\.[^.]+$/, '') + '.card.jpg'], true) : '';
+      const type = HERO_TYPES.includes(hero.hero_type) ? hero.hero_type : '';
+      const typed = !own && type ? await firstOk(['hero_library/type_' + type + '.card.jpg'], true) : '';
+      const fallback = !own && !typed ? await firstOk(['hero_library/type_' + HERO_FALLBACK_TYPE + '.card.jpg'], true) : '';
+      const image = own || typed || fallback;
+      heroNote = own || typed ? '' : HERO_NOT_SET;
       if (template === 'standard') {
-        assets.heroPhotoUrl = BASE + (image || await firstOk([hero.photo && 'hero_library/' + safeName(hero.photo), DEFAULT_PHOTO]));
+        assets.heroPhotoUrl = BASE + (image || DEFAULT_PHOTO);
       } else if (image) { assets.heroSvg = HERO_SLOT; assets.heroImageUrl = BASE + image; }
       else {
         const svg = await firstOk([hero.file && /\.svg$/i.test(hero.file) && 'hero_library/' + safeName(hero.file), DEFAULT_SVG]);
@@ -213,6 +222,7 @@ async function generate() {
     } else {
       $('result').innerHTML = `<div class="okmsg">檢查全部通過（${res.checks.length} 項）</div>`;
     }
+    if (heroNote) $('result').insertAdjacentHTML('beforeend', `<p class="note heronote">右上角：${esc(heroNote)}</p>`);
     if (res.blob) {
       const name = `${stem(c.file)}_${template}_${skin}${draft ? '_草稿' : ''}.png`;
       current = { blob: res.blob, url: URL.createObjectURL(res.blob), name, sha256: res.sha256 };
