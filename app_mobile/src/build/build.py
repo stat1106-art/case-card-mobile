@@ -77,9 +77,9 @@ for (kind, name), case_file in sorted(used.items()):
     cp(pv, 'hero_library/' + pv.name)
 for p in sorted(FONTS.iterdir()): cp(p, 'fonts/' + p.name)
 for n in ('OFL.txt', 'FONTS_LICENSE.md'): cp(KIT / 'casecard/assets/fonts' / n, 'fonts/' + n)
-# 圖示：發包人選用的 1024 原檔（build/icon_source/01_silver_gold.png，不覆蓋）縮出各尺寸
-ICON_SRC = Path(__file__).resolve().parent / 'icon_source' / '01_silver_gold.png'
-ICON_SHA = '4a4e4ebb31f3bc98b5958f4619d737505dd3f080d32db56132299e967f5ff039'
+# 圖示：發包人選用的 1024 原檔（build/icon_source/robot_black_starry.png，2026-10-23 改選黑色星空款，不覆蓋）縮出各尺寸
+ICON_SRC = Path(__file__).resolve().parent / 'icon_source' / 'robot_black_starry.png'
+ICON_SHA = '5c42b32d86d37c1b47d6253bac7bc956483edd409bb5fe61d511b0456b66e43c'
 if hashlib.sha256(ICON_SRC.read_bytes()).hexdigest() != ICON_SHA: raise SystemExit('App 圖示原檔被改過，和發包人選的不同')
 icon_src = Image.open(ICON_SRC).convert('RGB')
 def icon(size):
