@@ -1,4 +1,9 @@
-# 事故類型示意圖：畫圖規格（給 Gemini）
+# 事故類型示意圖：畫圖規格
+
+> **2026-10-24 更新**：類型擴充為 14 類（再加 construction 營造、heat 熱危害、disease 職業病、healthcare 醫療照護、stress 職場壓力、neutral 中性／法律）。
+> 檔名改為 `hero_<類型>_a.png`（主用）、`hero_<類型>_b.png`（備用，不放進網站）；來源紀錄同名 `.provenance.json`。
+> 已放入（發包人 2026-10-24 核准，GPT 內建生圖）：overwork、fall、machine 各 a／b。其餘 11 類待補；沒圖的類型用 overwork_a，App 註明「示意圖尚未配置」。
+> 下方表格與檔名是舊版（8 類、type_ 開頭）規格，畫圖要點仍適用。
 
 ## 8 張圖與檔名
 | 類型 | 檔名 | 畫什麼（建議） |

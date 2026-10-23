@@ -61,14 +61,21 @@ for p in sorted(CASES.glob('*.json')):
     except Exception: continue   # 壞掉的案例檔由 App 標示「讀不出來」
     # 舊的 hero.photo 欄位不再收：沒有專屬圖時改用事故類型圖，最後一層是一定會放的預設照片（app.js 的 DEFAULT_PHOTO）
     if hero.get('image'): used[('image', hero['image'])] = p.name
-# 事故類型圖庫：hero_library/type_<類型>.png｜.jpg｜.webp（案例 card.hero.hero_type 選類型，app.js 找 type_<類型>.card.jpg）
-# 只認這 8 類；檔名是 type_ 開頭卻不是這 8 類就停止（避免放進沒人管的圖）。來源紀錄要有 type、author、date、approved_date。
-HERO_TYPES = ['overwork', 'fall', 'machine', 'traffic', 'chemical', 'electric', 'collapse', 'commute']
-for src in sorted((KIT / 'hero_library').glob('type_*')):
-    if src.name.endswith('.provenance.json'): continue
-    t = src.name[5:].rsplit('.', 1)[0]
-    if t not in HERO_TYPES: raise SystemExit(f'類型圖 {src.name} 的類型不是這 8 類之一：{"、".join(HERO_TYPES)}')
-    used[('type', src.name)] = t
+# 事故類型圖庫：hero_library/hero_<類型>_<a|b|…>.png｜.jpg｜.webp（案例 card.hero.hero_type 選類型）。
+# 每類只放「使用中」那一張進網站（預設 _a，其他留在 hero_library 備用），網站檔名一律 type_<類型>.card.jpg（app.js 用同一規則找檔）。
+# 只認下列類型；檔名是 hero_<英文>_<字母> 卻不是這些類型就停止。來源紀錄要有 type、author、date、approved_date。
+HERO_TYPES = ['overwork', 'fall', 'machine', 'traffic', 'chemical', 'electric', 'collapse', 'commute',
+              'construction', 'heat', 'disease', 'healthcare', 'stress', 'neutral']
+ACTIVE_VARIANT = 'a'
+import re as _re2
+type_src = {}
+for src in sorted((KIT / 'hero_library').iterdir()):
+    m = _re2.fullmatch(r'hero_([a-z]+)_([a-z])\.(png|jpe?g|webp)', src.name)
+    if not m: continue
+    t, v = m.group(1), m.group(2)
+    if t not in HERO_TYPES: raise SystemExit(f'類型圖 {src.name} 的類型不在清單裡：{"、".join(HERO_TYPES)}')
+    if v == ACTIVE_VARIANT: type_src[t] = src.name
+for t, name in type_src.items(): used[('type', name)] = t
 # App 找不到案例的圖時（例如貼上的案例）原版改用這張預設照片（app.js 的 DEFAULT_PHOTO），所以一定要放
 used.setdefault(('image', 'overwork_night_desk_photo.png'), '（預設圖）')
 for (kind, name), case_file in sorted(used.items()):
@@ -85,7 +92,7 @@ for (kind, name), case_file in sorted(used.items()):
     if im.width / im.height > r: w = round(im.height * r); x0 = round((im.width - w) * fx); im = im.crop((x0, 0, x0 + w, im.height))
     else: h = round(im.width / r); y0 = round((im.height - h) * fy); im = im.crop((0, y0, im.width, y0 + h))
     im = im.resize((HERO_W, HERO_H), Image.LANCZOS)
-    dst = out / 'hero_library' / card_name(name); dst.parent.mkdir(parents=True, exist_ok=True)
+    dst = out / 'hero_library' / (f'type_{case_file}.card.jpg' if kind == 'type' else card_name(name)); dst.parent.mkdir(parents=True, exist_ok=True)
     for q in (85, 75, 65):
         im.save(dst, 'JPEG', quality=q, optimize=True, progressive=False)
         if dst.stat().st_size <= HERO_MAX_BYTES: break

@@ -22,7 +22,7 @@ Gemini 回覆後，按程式碼框右上角的「複製」，貼進記事本，�
 7. facts 的 icon 從 overtime、newhire、event、course、phone、check 中選。
 8. result.flow：damage_total × fault_op 的比例（四捨五入到元）要等於 after_fault，再減 offset 等於 total。
 9. 原告是自然人時，parties.plaintiff.natural_person 填 true，display.mask_natural_person_name 填 true；**name 欄位直接寫遮好的姓名「姓＋○○」（例如「羅○○」），不要寫全名**（案例檔會放上公開網站）。
-10. hero 沿用範例的值（file、caption 不要改），另外加 hero_type 填事故類型（overwork 過勞、fall 高處墜落、machine 機械捲夾、traffic 交通、chemical 化學、electric 感電、collapse 物體倒塌、commute 通勤，八選一）；不要加 image，除非我另外給你該案專屬圖。
+10. hero 沿用範例的值（file、caption 不要改），另外加 hero_type 填事故類型（overwork 過勞、fall 高處墜落、machine 機械捲夾、traffic 交通、chemical 化學、electric 感電、collapse 物體倒塌、commute 通勤、construction 營造、heat 熱危害、disease 職業病、healthcare 醫療照護、stress 職場壓力、neutral 其他／中性，十四選一）；不要加 image，除非我另外給你該案專屬圖。
 
 ## 存檔前自己看一眼
 - 案號、日期、金額和判決對得上嗎？

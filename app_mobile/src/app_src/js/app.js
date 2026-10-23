@@ -32,7 +32,8 @@ const PASTE_TAG = '（貼上）';
 const DEFAULT_PHOTO = 'hero_library/overwork_night_desk_photo.card.jpg';
 const DEFAULT_SVG = 'hero_library/overwork_night_desk.svg';
 // 事故類型圖庫（案例 card.hero.hero_type）；沒有對應的類型圖時用 overwork，並在畫面註明
-const HERO_TYPES = ['overwork', 'fall', 'machine', 'traffic', 'chemical', 'electric', 'collapse', 'commute'];
+const HERO_TYPES = ['overwork', 'fall', 'machine', 'traffic', 'chemical', 'electric', 'collapse', 'commute',
+  'construction', 'heat', 'disease', 'healthcare', 'stress', 'neutral'];
 const HERO_FALLBACK_TYPE = 'overwork';
 const HERO_NOT_SET = '示意圖尚未配置';
 // 新第一版、淺色版放情境圖時，SVG 插畫的位置換成這個空位（填滿右上那一格），存圖時再把圖疊上去

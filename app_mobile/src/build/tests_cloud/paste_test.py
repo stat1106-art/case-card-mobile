@@ -63,13 +63,11 @@ try:
         d["card"]["hero"].pop("image", None); d["card"]["hero"]["photo"] = "no_such_photo.png"; d["card"]["hero"]["file"] = "no_such.svg"
         m = paste(pg, json.dumps(d, ensure_ascii=False)); rec("缺圖案例加入", m.startswith("已加入："), m)
         pick_pasted(pg, 1)
-        res = gen(pg, "standard", name="missing_standard.png")
-        rec("缺圖：原版改用預設照片、照樣出圖", res.startswith("檢查全部通過") and hero_same(out / "missing_standard.png", jpg) > 85, res[:16])
-        res = gen(pg, "classic", name="missing_classic.png")
-        svgref = Image.open(ref / "classic_original.png").convert("RGB").crop((577, 0, 1080, 290))
-        rec("缺圖：新第一版改用預設 SVG、照樣出圖", res.startswith("檢查全部通過") and hero_same(out / "missing_classic.png", svgref) > 85, res[:16])
-        res = gen(pg, "light", name="missing_light.png")
-        rec("缺圖：淺色照樣出圖", res.startswith("檢查全部通過"), res[:16])
+        # 圖檔都不存在、沒寫類型：三個版型都改用 overwork 類型圖，並註明「示意圖尚未配置」
+        ow = Image.open(serve / "repo/hero_library/type_overwork.card.jpg").convert("RGB")
+        for t in ("standard", "classic", "light"):
+            res = gen(pg, t, name=f"missing_{t}.png")
+            rec(f"缺圖：{t} 用 overwork 類型圖＋註明、照樣出圖", res.startswith("檢查全部通過") and "示意圖尚未配置" in res and hero_same(out / f"missing_{t}.png", ow) > 85, res[:16])
         # (c) 重開還在
         pg.reload(); pg.wait_for_selector("input[name=c]")
         n_p = sum(x.endswith("（貼上）") for x in labels(pg))
