@@ -23,19 +23,32 @@ CASES = Path(sys.argv[sys.argv.index('--cases') + 1]) if '--cases' in sys.argv e
 for p in sorted(CASES.glob('*.json')): cp(p, 'cases/' + p.name)
 for p in sorted(FONTS.iterdir()): cp(p, 'fonts/' + p.name)
 for n in ('OFL.txt', 'FONTS_LICENSE.md'): cp(KIT / 'casecard/assets/fonts' / n, 'fonts/' + n)
-# 圖示
-f = ImageFont.truetype(str(KIT / 'casecard/assets/fonts/NotoSansTC-VF.ttf'), 10)
-def icon(size, pad):
-    im = Image.new('RGB', (size, size), '#1f5fbf'); d = ImageDraw.Draw(im)
-    fnt = ImageFont.truetype(str(KIT / 'casecard/assets/fonts/NotoSansTC-VF.ttf'), int(size * (0.30 if pad else 0.36)))
-    try: fnt.set_variation_by_axes([900])
-    except Exception: pass
-    for i, t in enumerate(('職災', '小卡')):
-        d.text((size / 2, size * (0.36 + 0.30 * i) if not pad else size * (0.38 + 0.26 * i)), t, font=fnt, fill='white', anchor='mm')
-    return im
+# 圖示：深藍底＋一張白色小卡（黑標題條、內文線、紅色金額條、綠色勾），配色取自原版小卡；不放字（iPhone 會在圖示下方顯示名稱）
+NAVY, CARD, BAND, LINE, RED, GREEN, WHITE = "#1E4B78", "#FFFDF8", "#171614", "#D9D2C3", "#B3342B", "#1D7A4A", "#FFFFFF"
+def icon(size, safe=1.0):
+    k = 4; S = size * k
+    im = Image.new('RGB', (S, S), NAVY); d = ImageDraw.Draw(im)
+    def box(x0, y0, x1, y1):
+        f = lambda v: (0.5 + (v - 0.5) * safe) * S
+        return [f(x0), f(y0), f(x1), f(y1)]
+    r = lambda v: v * safe * S
+    d.rounded_rectangle(box(0.22, 0.16, 0.78, 0.84), radius=r(0.06), fill=CARD)
+    d.rounded_rectangle(box(0.22, 0.16, 0.78, 0.34), radius=r(0.06), fill=BAND)
+    d.rectangle(box(0.22, 0.28, 0.78, 0.34), fill=BAND)
+    d.rounded_rectangle(box(0.29, 0.22, 0.56, 0.28), radius=r(0.02), fill=WHITE)
+    for y in (0.42, 0.52):
+        d.rounded_rectangle(box(0.29, y, 0.71, y + 0.045), radius=r(0.022), fill=LINE)
+    d.rounded_rectangle(box(0.29, 0.62, 0.55, 0.74), radius=r(0.03), fill=RED)
+    cx, cy, cr = 0.655, 0.68, 0.085
+    d.ellipse(box(cx - cr, cy - cr, cx + cr, cy + cr), fill=GREEN)
+    pts = [box(x, y, x, y)[:2] for x, y in ((0.615, 0.68), (0.645, 0.71), (0.70, 0.645))]
+    d.line(pts, fill=WHITE, width=int(r(0.028)), joint='curve')
+    for p in (pts[0], pts[2]):
+        w = r(0.014); d.ellipse([p[0] - w, p[1] - w, p[0] + w, p[1] + w], fill=WHITE)
+    return im.resize((size, size), Image.LANCZOS)
 (out / 'icons').mkdir()
-icon(192, False).save(out / 'icons/icon-192.png'); icon(512, False).save(out / 'icons/icon-512.png')
-icon(512, True).save(out / 'icons/icon-512-maskable.png'); icon(180, False).save(out / 'icons/apple-touch-icon.png')
+icon(192).save(out / 'icons/icon-192.png'); icon(512).save(out / 'icons/icon-512.png')
+icon(512, 0.8).save(out / 'icons/icon-512-maskable.png'); icon(180).save(out / 'icons/apple-touch-icon.png')
 # 版本編號＝所有檔案內容的雜湊（內容一變就換）
 files = sorted(p for p in out.rglob('*') if p.is_file() and p.name != 'sw.js')
 h = hashlib.sha256()
