@@ -12,3 +12,8 @@
 - 打包好的網站（`dist/`）放在 **gh-pages** 分支的最上層，GitHub Pages 從那裡發布。
 - 重新打包時：`build/build.py` 的 `KIT` 指向本程式庫根目錄（例如建一個 `src2/case_card_app_kit` 捷徑指到程式庫），`build/fonts_out/` 放 gh-pages 分支 `fonts/` 裡的 woff2 與 `fonts.json`。
 - 示意圖暫換：`hero_library` 只收 `.svg`，照片不進網站（見 `../ACCEPTANCE.md`）。
+
+## v0.3.0 貼上案例
+- `app_src/js/app.js` 的 `extractJson()`：從貼上的文字找第一個完整 JSON 物件（每個「{」照括號深度找對應「}」，字串裡的括號不算；解析不了就換下一個「{」）。工作台的 `Core.extractJson` 原碼施工時沒有拿到，是照規格文字實作的。
+- 貼上的案例存在 localStorage `pastedCases`（陣列 `{id, data}`），不進離線快取清單。
+- 圖檔不在網站裡時：原版用 `hero_library/overwork_night_desk_photo.card.jpg`、新第一版與淺色用 `hero_library/overwork_night_desk.svg`（打包時一定會放）。

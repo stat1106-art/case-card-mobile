@@ -53,6 +53,8 @@ for p in sorted(CASES.glob('*.json')):
     except Exception: continue   # 壞掉的案例檔由 App 標示「讀不出來」
     if hero.get('photo') and not hero.get('image'): used[('photo', hero['photo'])] = p.name   # 有情境圖時照片用不到，不收
     if hero.get('image'): used[('image', hero['image'])] = p.name
+# App 找不到案例的圖時（例如貼上的案例）原版改用這張預設照片（app.js 的 DEFAULT_PHOTO），所以一定要放
+used.setdefault(('image', 'overwork_night_desk_photo.png'), '（預設圖）')
 for (kind, name), case_file in sorted(used.items()):
     src = hero_src(name)
     if kind == 'photo':
@@ -110,6 +112,6 @@ pre = ['./'] + [p.relative_to(out).as_posix() for p in files if not p.name.endsw
 sw = (out / 'sw.js').read_text(encoding='utf-8').replace('__BUILD__', build).replace('__PRECACHE__', json.dumps(pre, ensure_ascii=False))
 (out / 'sw.js').write_text(sw, encoding='utf-8')
 a = (out / 'js/app.js').read_text(encoding='utf-8').replace('__BUILD__', build); (out / 'js/app.js').write_text(a, encoding='utf-8')
-(out / 'version.json').write_text(json.dumps({'version': '0.2.0', 'build': build}), encoding='utf-8')
+(out / 'version.json').write_text(json.dumps({'version': '0.3.0', 'build': build}), encoding='utf-8')
 _done.append(True)
 print('build', build, len(pre), 'files')

@@ -1,7 +1,7 @@
 /* 職災小卡 手機版：畫面流程沿用 v0.1 電腦版，只把出圖改成在瀏覽器裡做。 */
 (function () {
 'use strict';
-const APP_VERSION = '0.2.0';
+const APP_VERSION = '0.3.0';
 const BUILD = '__BUILD__';
 // 壞檔在清單上的標示（驗收第 10 條的用字）；要換字只改這裡
 const BROKEN_LABEL = '這個案例讀不出來';
@@ -20,12 +20,23 @@ const MSG = {
   badSkin: '風格不正確，請重新選擇。',
   oops: '發生問題，請再試一次。',
   listFail: '案例清單讀不出來，請按「重新讀取」再試一次。',
+  pasteEmpty: '請先把小卡資料貼進上面的框。',
+  pasteBad: '貼上的內容不是小卡資料',
+  pasteOk: '已加入：',
+  pasteMemOnly: '這台手機存不住，關掉就不見',
+  pasteDeleted: '已刪除：',
 };
+const PASTE_KEY = 'pastedCases';
+const PASTE_TAG = '（貼上）';
+// 找不到圖時的預設圖：原版用 r9 照片（打包時一定會放、已裁好），新第一版與淺色用 SVG 插畫
+const DEFAULT_PHOTO = 'hero_library/overwork_night_desk_photo.card.jpg';
+const DEFAULT_SVG = 'hero_library/overwork_night_desk.svg';
 // 新第一版、淺色版放情境圖時，SVG 插畫的位置換成這個空位（填滿右上那一格），存圖時再把圖疊上去
 const HERO_SLOT = '<div id="hero-slot" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%"></div>';
 const $ = id => document.getElementById(id);
 const BASE = new URL('./', location.href).href;   // 相對路徑：放在 GitHub Pages 子目錄也能用
 let SKINS = {}, CASES = [], current = null;       // current = {blob, url, name}
+let PASTED = [], pasteMemOnly = false;            // 貼上的案例 [{id, data}]
 
 async function getJSON(path) {
   const r = await fetch(BASE + path, { cache: 'no-cache' });
@@ -37,7 +48,36 @@ async function getText(path) {
   if (!r.ok) throw new Error(r.status);
   return r.text();
 }
+// 從貼上的文字找出第一個完整的 JSON 物件（略過 ```json 圍欄與前後說明文字）：
+// 從每個「{」開始，照括號深度找到對應的「}」（字串裡的括號不算），能解析成物件就用它，不行就換下一個「{」。
+function extractJson(text) {
+  const s = String(text || '');
+  for (let i = s.indexOf('{'); i !== -1; i = s.indexOf('{', i + 1)) {
+    let depth = 0, inStr = false, bs = false;
+    for (let j = i; j < s.length; j++) {
+      const ch = s[j];
+      if (inStr) { if (bs) bs = false; else if (ch === '\\') bs = true; else if (ch === '"') inStr = false; continue; }
+      if (ch === '"') inStr = true;
+      else if (ch === '{') depth++;
+      else if (ch === '}' && --depth === 0) {
+        try { const v = JSON.parse(s.slice(i, j + 1)); if (v && typeof v === 'object' && !Array.isArray(v)) return v; } catch (e) { /* 換下一個「{」 */ }
+        break;
+      }
+    }
+  }
+  return null;
+}
 function okCase(d) { return d && typeof d === 'object' && !Array.isArray(d) && d.card && typeof d.card === 'object' && !Array.isArray(d.card) && d.source && typeof d.source === 'object' && !Array.isArray(d.source); }
+// 圖檔名只取檔名本身（貼上的資料可能寫了路徑或奇怪字元）
+function safeName(n) { return encodeURIComponent(String(n).split(/[\\/]/).pop()); }
+// 依序試，回傳第一個抓得到的路徑；都抓不到就回傳最後一個（預設圖）
+async function firstOk(paths) {
+  const list = paths.filter(Boolean);
+  for (const p of list) {
+    try { const r = await fetch(BASE + p); if (r.ok) return p; } catch (e) { /* 沒網路又不在快取裡 */ }
+  }
+  return list[list.length - 1] || '';
+}
 function stem(f) { return f.replace(/\.json$/i, ''); }
 
 async function loadSkins() {
@@ -57,26 +97,70 @@ async function loadCases() {
     } catch (e) { return { file, title: file, ok: false, note: BROKEN_LABEL }; }
   }));
 }
+// ── 貼上的案例：存在這台手機的瀏覽器（localStorage），讀寫失敗就只放在記憶體 ──
+function readPasted() {
+  try {
+    const v = JSON.parse(localStorage.getItem(PASTE_KEY) || '[]');
+    return Array.isArray(v) ? v.filter(x => x && typeof x.id === 'string' && x.data && typeof x.data === 'object') : [];
+  } catch (e) { pasteMemOnly = true; return []; }
+}
+function writePasted() {
+  try { localStorage.setItem(PASTE_KEY, JSON.stringify(PASTED)); pasteMemOnly = false; return true; }
+  catch (e) { pasteMemOnly = true; return false; }
+}
+function pasteTitle(d) { return String(d.title || (d.source && d.source.case_number) || '貼上的案例'); }
+function addPasted() {
+  const text = $('paste').value;
+  if (!text.trim()) { $('pastemsg').textContent = MSG.pasteEmpty; return; }
+  const d = extractJson(text);
+  if (!d || d.format !== 'case-card-app-case' || !okCase(d)) { $('pastemsg').textContent = MSG.pasteBad; return; }
+  const item = { id: 'pasted_' + Date.now().toString(36), data: d };
+  PASTED.push(item);
+  const saved = writePasted();
+  $('paste').value = '';
+  $('pastemsg').textContent = MSG.pasteOk + pasteTitle(d) + (saved ? '' : '。' + MSG.pasteMemOnly);
+  renderList(item.id);
+}
+function deletePasted(id) {
+  const item = PASTED.find(x => x.id === id);
+  PASTED = PASTED.filter(x => x.id !== id);
+  const saved = writePasted();
+  $('pastemsg').textContent = (item ? MSG.pasteDeleted + pasteTitle(item.data) : '') + (saved ? '' : '。' + MSG.pasteMemOnly);
+  renderList();
+}
+function allCases() {
+  return CASES.concat(PASTED.map(x => ({ file: x.id, title: pasteTitle(x.data), ok: true, data: x.data, pasted: true })));
+}
+function renderList(select) {
+  const keep = select || (document.querySelector('input[name=c]:checked') || {}).value;
+  $('cases').innerHTML = '';
+  allCases().forEach(c => {
+    const l = document.createElement('label'); l.className = 'case' + (c.ok ? '' : ' bad');
+    if (c.ok) { const r = document.createElement('input'); r.type = 'radio'; r.name = 'c'; r.value = c.file; l.append(r); }
+    l.append(c.ok ? c.title + (c.pasted ? PASTE_TAG : '') : `${c.file}（${c.note}）`);
+    if (!c.pasted) { $('cases').append(l); return; }
+    const row = document.createElement('div'); row.className = 'caserow';
+    const del = document.createElement('button'); del.type = 'button'; del.textContent = '刪除';
+    del.setAttribute('aria-label', '刪除 ' + c.title); del.onclick = () => deletePasted(c.file);
+    row.append(l, del); $('cases').append(row);
+  });
+  const r = [...document.querySelectorAll('input[name=c]')];
+  (r.find(x => x.value === keep) || r[0] || {}).checked = true;
+  return r.length;
+}
 async function load() {
   const keep = (document.querySelector('input[name=c]:checked') || {}).value;
-  $('cases').innerHTML = '';
   try {
     if (!$('tpl').options.length) {
       TEMPLATES.forEach(([id, n]) => $('tpl').add(new Option(n, id)));
       (await loadSkins()).forEach(s => $('skin').add(new Option(s.name, s.id)));
     }
     CASES = await loadCases();
-  } catch (e) { $('msg').textContent = MSG.listFail; return; }
-  CASES.forEach(c => {
-    const l = document.createElement('label'); l.className = 'case' + (c.ok ? '' : ' bad');
-    if (c.ok) { const r = document.createElement('input'); r.type = 'radio'; r.name = 'c'; r.value = c.file; l.append(r); }
-    l.append(c.ok ? c.title : `${c.file}（${c.note}）`);
-    $('cases').append(l);
-  });
-  const r = [...document.querySelectorAll('input[name=c]')];
-  (r.find(x => x.value === keep) || r[0] || {}).checked = true;
+  } catch (e) { CASES = []; $('msg').textContent = MSG.listFail; renderList(keep); return; }
+  const n = renderList(keep);
   $('disc').textContent = DISCLAIMER; tplChange();
-  $('msg').textContent = r.length ? MSG.loaded : MSG.none;
+  $('msg').textContent = n ? MSG.loaded : MSG.none;
+  if (pasteMemOnly && PASTED.length) $('pastemsg').textContent = MSG.pasteMemOnly;
 }
 function tplChange() {
   const c = $('tpl').value === 'classic'; $('skin').disabled = !c;
@@ -97,7 +181,7 @@ async function generate() {
   if (!TEMPLATES.some(t => t[0] === template)) { $('msg').textContent = MSG.badTpl; return; }
   if (template !== 'classic') skin = 'original';
   if (!SKINS[skin]) { $('msg').textContent = MSG.badSkin; return; }
-  const c = CASES.find(x => x.file === sel.value);
+  const c = allCases().find(x => x.file === sel.value);
   if (!c || !c.ok) { $('msg').textContent = MSG.badFile; return; }
   $('msg').textContent = MSG.busy; clearResult(); $('go').disabled = true;
   try {
@@ -106,12 +190,17 @@ async function generate() {
       const hero = (c.data.card && c.data.card.hero) || {};
       const assets = { standardCss: await getText('design/standard.css') };
       // 右上角的圖：有每案情境圖（hero.image）就三個版型都用它；沒有就照舊：
-      // 原版用照片（hero.photo，r9 發包人 2026-10-23 同意沿用），沒有照片用 SVG 插畫；新第一版、淺色版用 SVG 插畫。
+      // 原版用照片（hero.photo），新第一版、淺色版用 SVG 插畫（hero.file）。
       // 情境圖打包時已裁好、存成「主檔名.card.jpg」（build.py 的 card_name）。
-      const image = hero.image ? 'hero_library/' + hero.image.replace(/\.[^.]+$/, '') + '.card.jpg' : '';
-      if (template === 'standard') assets.heroPhotoUrl = BASE + (image || 'hero_library/' + (hero.photo || hero.file));
-      else if (image) { assets.heroSvg = HERO_SLOT; assets.heroImageUrl = BASE + image; }
-      else assets.heroSvg = await getText('hero_library/' + hero.file);
+      // 圖檔不在網站裡（例如貼上的案例）就改用預設圖：原版 r9 照片、新第一版與淺色 SVG 插畫。缺圖不能讓小卡出不來。
+      const image = hero.image ? await firstOk(['hero_library/' + safeName(hero.image).replace(/\.[^.]+$/, '') + '.card.jpg']) : '';
+      if (template === 'standard') {
+        assets.heroPhotoUrl = BASE + (image || await firstOk([hero.photo && 'hero_library/' + safeName(hero.photo), DEFAULT_PHOTO]));
+      } else if (image) { assets.heroSvg = HERO_SLOT; assets.heroImageUrl = BASE + image; }
+      else {
+        const svg = await firstOk([hero.file && /\.svg$/i.test(hero.file) && 'hero_library/' + safeName(hero.file), DEFAULT_SVG]);
+        assets.heroSvg = await getText(svg);
+      }
       res = await CardRender.renderCard({ kase: c.data, template, skin, draft, skinsById: SKINS, assets, base: BASE, host: $('stage') });
     } catch (e) { console.error(e); $('msg').textContent = MSG.cannot; return; }
     $('msg').textContent = '';
@@ -146,7 +235,7 @@ async function save() {
   }
   showFull();
 }
-$('tpl').onchange = tplChange; $('reload').onclick = load; $('go').onclick = generate; $('save').onclick = save;
+$('tpl').onchange = tplChange; $('reload').onclick = load; $('addpaste').onclick = addPasted; $('go').onclick = generate; $('save').onclick = save;
 $('closefull').onclick = () => { $('full').hidden = true; };
 $('ver').textContent = `版本 ${APP_VERSION}（${BUILD}）`;
 
@@ -156,6 +245,7 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController && !reloaded) { reloaded = true; location.reload(); } });
   navigator.serviceWorker.register('sw.js').then(reg => reg.update()).catch(() => {});
 }
-window.__app = { BROKEN_LABEL, APP_VERSION, BUILD, get current() { return current; } };
+window.__app = { BROKEN_LABEL, APP_VERSION, BUILD, extractJson, get current() { return current; } };
+PASTED = readPasted();
 CardRender.init(BASE).then(load).catch(() => { $('msg').textContent = MSG.listFail; });
 })();

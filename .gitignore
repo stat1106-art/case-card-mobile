@@ -3,5 +3,5 @@ casecard/_work/
 __pycache__/
 verify_out_js/
 __pycache__/
-app_v0.2.0/src/src2/
-app_v0.2.0/src/build/fonts_out/
+app_mobile/src/src2/
+app_mobile/src/build/fonts_out/
