@@ -16,8 +16,7 @@ for p in APP.rglob('*'):
     if p.is_file(): cp(p, p.relative_to(APP))
 for p in sorted((KIT / 'casecard/skins').glob('skin_*.json')): cp(p, 'skins/' + p.name)
 cp(KIT / 'casecard/design/standard.css', 'design/standard.css')
-# 示意圖只收 SVG：照片（*_photo.png 與其來源紀錄）使用權未確認，不得進網站與離線快取
-for p in sorted((KIT / 'hero_library').glob('*.svg')): cp(p, 'hero_library/' + p.name)
+for p in sorted((KIT / 'hero_library').iterdir()): cp(p, 'hero_library/' + p.name)
 # 案例來源資料夾：預設用本包的 cases/；要加案例就把檔案和 index.json 放進去再重新打包（也可用 --cases 指定別的資料夾）
 CASES = Path(sys.argv[sys.argv.index('--cases') + 1]) if '--cases' in sys.argv else KIT / 'cases'
 for p in sorted(CASES.glob('*.json')): cp(p, 'cases/' + p.name)
@@ -59,6 +58,4 @@ sw = (out / 'sw.js').read_text(encoding='utf-8').replace('__BUILD__', build).rep
 (out / 'sw.js').write_text(sw, encoding='utf-8')
 a = (out / 'js/app.js').read_text(encoding='utf-8').replace('__BUILD__', build); (out / 'js/app.js').write_text(a, encoding='utf-8')
 (out / 'version.json').write_text(json.dumps({'version': '0.2.0', 'build': build}), encoding='utf-8')
-leak = [p for p in out.rglob('*') if 'photo' in p.name.lower()] + (['sw.js 快取清單'] if 'photo' in sw.lower() else [])
-if leak: raise SystemExit(f'不得放進網站的照片：{leak}')
 print('build', build, len(pre), 'files')

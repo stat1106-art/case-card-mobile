@@ -68,6 +68,44 @@ async function toB64(url) {
   let bin = ''; for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000));
   const v = btoa(bin); dataUrlCache.set(url, v); return v;
 }
+// 給維護人員看：「文字超出所屬的框」是哪幾個字、超出哪一邊幾 px（判斷規則同 JS_MEASURE 的 L02，只多記超出量，不影響檢查結果）
+function clipDiag(doc) {
+  const out = [], w = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT); let n;
+  while ((n = w.nextNode())) {
+    if (!n.textContent.trim()) continue;
+    const host = n.parentElement.closest('.hc,.ac,.finding,.pending,.box,.disc,.draftbar,.head-l,.tag,.sh') || doc.body;
+    const h = host.getBoundingClientRect(), rg = doc.createRange(); rg.selectNodeContents(n);
+    for (const r of rg.getClientRects()) {
+      const d = { 左: h.left - r.left, 右: r.right - h.right, 上: h.top - r.top, 下: r.bottom - h.bottom };
+      const over = Object.entries(d).filter(([, v]) => v > 0.5).map(([k, v]) => `${k} ${v.toFixed(2)}px`);
+      if (over.length) out.push(`「${n.textContent.trim().slice(0, 20)}」超出 ${host === doc.body ? "整張圖" : (host.id || host.className)}：${over.join('、')}`);
+    }
+  }
+  return out;
+}
+// 小卡 HTML → SVG（foreignObject）圖片
+async function svgImage(html) {
+  const pdoc = new DOMParser().parseFromString(html, 'text/html');
+  const xhtml = new XMLSerializer().serializeToString(pdoc.documentElement);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${EN.W}" height="${EN.H}" viewBox="0 0 ${EN.W} ${EN.H}"><foreignObject x="0" y="0" width="${EN.W}" height="${EN.H}">${xhtml}</foreignObject></svg>`;
+  // 用 data: 網址（blob: 網址的 SVG 在部分瀏覽器會讓畫布無法輸出）
+  const img = new Image(); img.decoding = 'sync';
+  await new Promise((res, rej) => { img.onload = res; img.onerror = () => rej(new Error('圖片轉換失敗')); img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); });
+  try { await img.decode(); } catch (e) { /* 部分瀏覽器不支援 */ }
+  return img;
+}
+async function loadImage(url) {
+  const img = new Image();
+  await new Promise((res, rej) => { img.onload = res; img.onerror = () => rej(new Error('右上的圖讀不出來')); img.src = url; });
+  try { await img.decode(); } catch (e) { /* 部分瀏覽器不支援 */ }
+  return img;
+}
+// 照 CSS object-fit: cover（置中裁切）畫進框裡
+function drawCover(ctx, { img, x, y, w, h }) {
+  const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+  const s = Math.max(w / iw, h / ih), sw = w / s, sh = h / s;
+  ctx.drawImage(img, (iw - sw) / 2, (ih - sh) / 2, sw, sh, x, y, w, h);
+}
 async function sha256(blob) {
   if (!(G.crypto && crypto.subtle)) return '';
   const h = await crypto.subtle.digest('SHA-256', await blob.arrayBuffer());
@@ -105,6 +143,7 @@ async function renderCard(opts) {
   const measure = win.eval('(' + EN.JS_MEASURE + ')');
   const m = measure({ minFont: EN.MIN_FONT_PX, immutable: prep.card.immutable_checks || [] });
   checks.push(...EN.layoutChecks(m, prep.card, prep.deco));
+  const diag = m.clipped.length ? clipDiag(doc) : [];
   checks.push(['F01 用到的字型都是隨包字型且已載入', allLoaded, needFaces.map(f => f.family + ' ' + f.weight + '：' + f.status)]);
   checks.push(['F02 字型檔 hash 已記錄', !!FONTS.sha256, FONTS.sha256 || '無']);
   // 5. 轉成 PNG：把用到的字型塊嵌進 SVG（圖片裡不能再去讀外部檔）
@@ -123,32 +162,30 @@ async function renderCard(opts) {
   usedFiles.add('BarlowCondensed-Bold.woff2'); usedFiles.add('BarlowCondensed-ExtraBold.woff2');
   const b64 = {}; for (const f of usedFiles) b64[f] = await toB64(fontUrl(f));
   let svgHtml = swapFonts(prep.html, f => b64[f] ? 'data:font/woff2;base64,' + b64[f] : 'data:font/woff2;base64,', '');
+  // 原版右上的圖（照片或示意圖）不嵌進 SVG：Safari 存圖時不畫 SVG 裡用 <img> 放進來的圖（右上會空白）。
+  // 改成版面上留同樣大小的空位，整張畫完後再把圖直接畫到畫布的那一格；草稿標記原本壓在圖上，最後再單獨疊一次。
+  let hero = null, badgeImg = null;
   if (assets.heroPhotoUrl && !assets.heroPhotoUrl.startsWith('data:')) {
-    // Safari 存圖時不畫用 <img> 放進來的圖（PNG、SVG 都一樣，右上會空白）；新第一版、淺色版直接寫進版面的 SVG 則畫得出來。
-    // 所以 SVG 示意圖改成直接寫進版面（框的大小、位置照原本 img.hero 的樣式）。
     const tag = `<img class="hero" src="${assets.heroPhotoUrl}" alt="">`;
-    if (!svgHtml.includes(tag)) throw new Error('找不到原版右上的示意圖位置');
-    if (/\.svg$/i.test(assets.heroPhotoUrl)) {
-      const svgText = await (await fetch(assets.heroPhotoUrl)).text();
-      svgHtml = svgHtml.split(tag).join(`<div class="hero" style="overflow:hidden">${svgText}</div>`);
-    } else {
-      svgHtml = svgHtml.split(`src="${assets.heroPhotoUrl}"`).join(`src="data:image/png;base64,${await toB64(assets.heroPhotoUrl)}"`);
+    if (!svgHtml.includes(tag)) throw new Error('找不到原版右上的圖的位置');
+    const rc = doc.querySelector('img.hero').getBoundingClientRect();
+    hero = { img: await loadImage(assets.heroPhotoUrl), x: rc.left, y: rc.top, w: rc.width, h: rc.height };
+    svgHtml = svgHtml.split(tag).join('<div class="hero"></div>');
+    if (doc.getElementById('draftbadge')) {
+      // 只留草稿標記、其他全部隱形（版面位置不變）、底色透明
+      const only = '<style>html,body,#card,.head{background:transparent!important}body *{visibility:hidden!important}#draftbadge,#draftbadge *{visibility:visible!important}</style>';
+      badgeImg = await svgImage(svgHtml.replace('</head>', only + '</head>'));
     }
   }
-  const pdoc = new DOMParser().parseFromString(svgHtml, 'text/html');
-  const xhtml = new XMLSerializer().serializeToString(pdoc.documentElement);
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${EN.W}" height="${EN.H}" viewBox="0 0 ${EN.W} ${EN.H}"><foreignObject x="0" y="0" width="${EN.W}" height="${EN.H}">${xhtml}</foreignObject></svg>`;
-  // 用 data: 網址（blob: 網址的 SVG 在部分瀏覽器會讓畫布無法輸出）
-  const svgUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-  const img = new Image(); img.decoding = 'sync';
-  await new Promise((res, rej) => { img.onload = res; img.onerror = () => rej(new Error('圖片轉換失敗')); img.src = svgUrl; });
-  try { await img.decode(); } catch (e) { /* 部分瀏覽器不支援 */ }
+  const img = await svgImage(svgHtml);
   const cv = document.createElement('canvas'); cv.width = EN.W; cv.height = EN.H;
   const ctx = cv.getContext('2d', { willReadFrequently: true });
   // Safari 第一次畫可能字型還沒套上：重畫到連續兩次結果一樣為止
   let prev = null;
   for (let i = 0; i < 8; i++) {
     ctx.clearRect(0, 0, EN.W, EN.H); ctx.drawImage(img, 0, 0, EN.W, EN.H);
+    if (hero) drawCover(ctx, hero);
+    if (badgeImg) ctx.drawImage(badgeImg, 0, 0, EN.W, EN.H);
     const d = ctx.getImageData(0, 0, EN.W, EN.H).data;
     let h = 0; for (let j = 0; j < d.length; j += 397) h = (h * 31 + d[j]) | 0;
     if (prev !== null && h === prev && i >= 2) break;
@@ -159,7 +196,7 @@ async function renderCard(opts) {
   if (blob) { const bm = await createImageBitmap(blob); ok = bm.width === EN.W && bm.height === EN.H; dims = `${bm.width}×${bm.height}`; bm.close && bm.close(); }
   checks.push(['P01 PNG 1080×1620', ok, dims || '沒有產生']);
   host.innerHTML = '';
-  return { checks, blob, sha256: blob ? await sha256(blob) : '', measure: m };
+  return { checks, blob, sha256: blob ? await sha256(blob) : '', measure: m, diag };
 }
 
 function friendly(checks, missing) {
