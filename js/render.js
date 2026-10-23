@@ -84,8 +84,9 @@ function clipDiag(doc) {
   return out;
 }
 // 小卡 HTML → SVG（foreignObject）圖片
-async function svgImage(html) {
+async function svgImage(html, tweak) {
   const pdoc = new DOMParser().parseFromString(html, 'text/html');
+  if (tweak) tweak(pdoc);
   const xhtml = new XMLSerializer().serializeToString(pdoc.documentElement);
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${EN.W}" height="${EN.H}" viewBox="0 0 ${EN.W} ${EN.H}"><foreignObject x="0" y="0" width="${EN.W}" height="${EN.H}">${xhtml}</foreignObject></svg>`;
   // 用 data: 網址（blob: 網址的 SVG 在部分瀏覽器會讓畫布無法輸出）
@@ -164,13 +165,12 @@ async function renderCard(opts) {
   let svgHtml = swapFonts(prep.html, f => b64[f] ? 'data:font/woff2;base64,' + b64[f] : 'data:font/woff2;base64,', '');
   // 右上角的圖（原版的照片／插畫、各版型的每案情境圖）不嵌進 SVG：Safari 存圖時不畫 SVG 裡用 <img> 放進來的圖。
   // 改成版面上留同大小的空位，整張畫完後再把圖直接畫到畫布的那一格；原本壓在圖上的東西（草稿標記、「示意圖」標籤）最後再單獨疊一次。
-  let hero = null, topImg = null, onTop = '#draftbadge';
+  let hero = null, topImg = null;
   if (assets.heroImageUrl) {                       // 新第一版、淺色版：空位 #hero-slot 填滿右上那一格
     const slot = doc.getElementById('hero-slot');
     if (!slot) throw new Error('找不到右上的圖的位置');
     const rc = slot.getBoundingClientRect();
     hero = { img: await loadImage(assets.heroImageUrl), x: rc.left, y: rc.top, w: rc.width, h: rc.height };
-    onTop = '#hero-slot ~ *';                       // 同一格裡排在圖後面的：標籤、草稿標記
   } else if (assets.heroPhotoUrl && !assets.heroPhotoUrl.startsWith('data:')) {   // 原版：img.hero
     const tag = `<img class="hero" src="${assets.heroPhotoUrl}" alt="">`;
     if (!svgHtml.includes(tag)) throw new Error('找不到右上的圖的位置');
@@ -178,10 +178,14 @@ async function renderCard(opts) {
     hero = { img: await loadImage(assets.heroPhotoUrl), x: rc.left, y: rc.top, w: rc.width, h: rc.height };
     svgHtml = svgHtml.split(tag).join('<div class="hero"></div>');
   }
-  if (hero && doc.querySelector(onTop)) {
-    // 只留壓在圖上的東西、其他全部隱形（版面位置不變）、底色透明；畫的時候再限制在那一格裡
-    const only = `<style>html,body,#card,.head{background:transparent!important}body *{visibility:hidden!important}${onTop},${onTop} *{visibility:visible!important}</style>`;
-    topImg = await svgImage(svgHtml.replace('</head>', only + '</head>'));
+  if (hero) {
+    // 那一格裡原本壓在圖上面的東西（新第一版往上疊的資訊列、「示意圖」標籤、草稿標記……）都要回到圖上面：
+    // 把整張小卡再畫一層，只拿掉「圖下面」的東西（頁面、頁首、圖框的底色與空位），畫的時候限制在那一格裡。
+    const clear = '<style>html,body,#card,header,.head{background:transparent!important;box-shadow:none!important}</style>';
+    topImg = await svgImage(svgHtml.replace('</head>', clear + '</head>'), d => {
+      const slot = d.getElementById('hero-slot');
+      if (slot) { slot.parentElement.style.background = 'transparent'; slot.remove(); }
+    });
   }
   const img = await svgImage(svgHtml);
   const cv = document.createElement('canvas'); cv.width = EN.W; cv.height = EN.H;
