@@ -30,3 +30,9 @@ button:disabled{opacity:.5}
 #stage{position:fixed;left:0;top:0;width:0;height:0;overflow:hidden;pointer-events:none}
 
 .diag{margin-top:8px;font-size:13px}.diag pre{white-space:pre-wrap;word-break:break-all;font-size:12px;margin:6px 0 0}
+.paste{border-bottom:1px solid #eee;padding-bottom:8px;margin-bottom:4px}
+.pastelabel{display:block;font-size:15px;color:#333;margin:4px 0 6px}
+#paste{display:block;width:100%;font-size:16px;padding:8px;border:1px solid #bbb;border-radius:8px;resize:vertical;font-family:ui-monospace,Menlo,monospace}
+.caserow{display:flex;align-items:center;gap:8px;border-bottom:1px solid #eee}
+.caserow .case{flex:1;border-bottom:0}
+.caserow button{min-height:44px;padding:6px 12px;font-size:15px;flex:none}

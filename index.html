@@ -19,6 +19,12 @@
 <h1>職災小卡</h1>
 <section>
 <h2>1. 選案例</h2>
+<div class="paste">
+<label for="paste" class="pastelabel">貼上案例（把整段小卡資料貼進來，前後有說明文字也沒關係）</label>
+<textarea id="paste" rows="4" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="在這裡貼上小卡資料"></textarea>
+<button id="addpaste" type="button" class="sub">加入</button>
+<p id="pastemsg" class="note" aria-live="polite"></p>
+</div>
 <div id="cases"></div>
 <button id="reload" type="button" class="sub">重新讀取</button>
 </section>
