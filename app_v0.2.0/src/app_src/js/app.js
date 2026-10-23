@@ -21,6 +21,8 @@ const MSG = {
   oops: '發生問題，請再試一次。',
   listFail: '案例清單讀不出來，請按「重新讀取」再試一次。',
 };
+// 新第一版、淺色版放情境圖時，SVG 插畫的位置換成這個空位（填滿右上那一格），存圖時再把圖疊上去
+const HERO_SLOT = '<div id="hero-slot" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%"></div>';
 const $ = id => document.getElementById(id);
 const BASE = new URL('./', location.href).href;   // 相對路徑：放在 GitHub Pages 子目錄也能用
 let SKINS = {}, CASES = [], current = null;       // current = {blob, url, name}
@@ -103,8 +105,12 @@ async function generate() {
     try {
       const hero = (c.data.card && c.data.card.hero) || {};
       const assets = { standardCss: await getText('design/standard.css') };
-      // 原版右上用照片（發包人 2026-10-23 同意沿用）；案例沒有照片時改用示意圖 SVG
-      if (template === 'standard') assets.heroPhotoUrl = BASE + 'hero_library/' + (hero.photo || hero.file);
+      // 右上角的圖：有每案情境圖（hero.image）就三個版型都用它；沒有就照舊：
+      // 原版用照片（hero.photo，r9 發包人 2026-10-23 同意沿用），沒有照片用 SVG 插畫；新第一版、淺色版用 SVG 插畫。
+      // 情境圖打包時已裁好、存成「主檔名.card.jpg」（build.py 的 card_name）。
+      const image = hero.image ? 'hero_library/' + hero.image.replace(/\.[^.]+$/, '') + '.card.jpg' : '';
+      if (template === 'standard') assets.heroPhotoUrl = BASE + (image || 'hero_library/' + (hero.photo || hero.file));
+      else if (image) { assets.heroSvg = HERO_SLOT; assets.heroImageUrl = BASE + image; }
       else assets.heroSvg = await getText('hero_library/' + hero.file);
       res = await CardRender.renderCard({ kase: c.data, template, skin, draft, skinsById: SKINS, assets, base: BASE, host: $('stage') });
     } catch (e) { console.error(e); $('msg').textContent = MSG.cannot; return; }
