@@ -28,3 +28,5 @@ button:disabled{opacity:.5}
 #full .hint{color:#fff;font-size:18px;margin:4px 0 8px}
 #fullpic{max-width:100%;max-height:calc(100% - 120px);object-fit:contain;-webkit-touch-callout:default}
 #stage{position:fixed;left:0;top:0;width:0;height:0;overflow:hidden;pointer-events:none}
+
+.diag{margin-top:8px;font-size:13px}.diag pre{white-space:pre-wrap;word-break:break-all;font-size:12px;margin:6px 0 0}

@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 const APP_VERSION = '0.2.0';
-const BUILD = '550191349a';
+const BUILD = 'e12ba92000';
 // 壞檔在清單上的標示（驗收第 10 條的用字）；要換字只改這裡
 const BROKEN_LABEL = '這個案例讀不出來';
 const DISCLAIMER = '案例內容由 AI 整理，正式使用前請自己對照判決核對。';
@@ -103,8 +103,8 @@ async function generate() {
     try {
       const hero = (c.data.card && c.data.card.hero) || {};
       const assets = { standardCss: await getText('design/standard.css') };
-      // 示意圖暫換：照片使用權未確認、不放進網站，原版右上改用示意圖 SVG
-      if (template === 'standard') assets.heroPhotoUrl = BASE + 'hero_library/' + hero.file;
+      // 原版右上用照片（發包人 2026-10-23 同意沿用）；案例沒有照片時改用示意圖 SVG
+      if (template === 'standard') assets.heroPhotoUrl = BASE + 'hero_library/' + (hero.photo || hero.file);
       else assets.heroSvg = await getText('hero_library/' + hero.file);
       res = await CardRender.renderCard({ kase: c.data, template, skin, draft, skinsById: SKINS, assets, base: BASE, host: $('stage') });
     } catch (e) { console.error(e); $('msg').textContent = MSG.cannot; return; }
@@ -113,7 +113,8 @@ async function generate() {
     const problems = CardRender.friendly(res.checks, res.missing);
     if (failed.length) {
       $('result').innerHTML = `<div class="warn"><b>檢查沒過（${failed.length} 項），請修改案例內容：</b><ul>${problems.map(f => '<li>' + esc(f) + '</li>').join('')}</ul>` +
-        (res.blob ? '下面的圖照原樣產生，讓你看哪裡超出；文字沒有被縮小或刪減。' : '') + '</div>';
+        (res.blob ? '下面的圖照原樣產生，讓你看哪裡超出；文字沒有被縮小或刪減。' : '') +
+        `<details class="diag"><summary>給維護人員看的詳細資料</summary><pre>${esc([navigator.userAgent, ...(res.diag || []), ...failed.map(x => x[0] + '：' + JSON.stringify(x[2]))].join('\n'))}</pre></details></div>`;
     } else {
       $('result').innerHTML = `<div class="okmsg">檢查全部通過（${res.checks.length} 項）</div>`;
     }
