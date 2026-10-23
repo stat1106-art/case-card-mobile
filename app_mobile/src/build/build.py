@@ -79,8 +79,11 @@ for (kind, name), case_file in sorted(used.items()):
         raise SystemExit(f'{pv.name} 的 type 要寫 {case_file}')
     im = Image.open(src).convert('RGB')
     r = HERO_W / HERO_H
-    if im.width / im.height > r: w = round(im.height * r); im = im.crop(((im.width - w) // 2, 0, (im.width - w) // 2 + w, im.height))
-    else: h = round(im.width / r); im = im.crop((0, (im.height - h) // 2, im.width, (im.height - h) // 2 + h))
+    # 來源紀錄可寫 crop_focus_x／crop_focus_y（0＝保留左／上緣、0.5＝置中〔預設〕、1＝保留右／下緣）調整裁切位置
+    pvd = json.loads(pv.read_text(encoding='utf-8'))
+    fx, fy = (min(1.0, max(0.0, float(pvd.get(k, 0.5)))) for k in ('crop_focus_x', 'crop_focus_y'))
+    if im.width / im.height > r: w = round(im.height * r); x0 = round((im.width - w) * fx); im = im.crop((x0, 0, x0 + w, im.height))
+    else: h = round(im.width / r); y0 = round((im.height - h) * fy); im = im.crop((0, y0, im.width, y0 + h))
     im = im.resize((HERO_W, HERO_H), Image.LANCZOS)
     dst = out / 'hero_library' / card_name(name); dst.parent.mkdir(parents=True, exist_ok=True)
     for q in (85, 75, 65):
