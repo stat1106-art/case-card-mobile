@@ -75,32 +75,32 @@ for (kind, name), case_file in sorted(used.items()):
     cp(pv, 'hero_library/' + pv.name)
 for p in sorted(FONTS.iterdir()): cp(p, 'fonts/' + p.name)
 for n in ('OFL.txt', 'FONTS_LICENSE.md'): cp(KIT / 'casecard/assets/fonts' / n, 'fonts/' + n)
-# 圖示：深藍底＋一張白色小卡（黑標題條、內文線、紅色金額條、綠色勾），配色取自原版小卡；不放字（iPhone 會在圖示下方顯示名稱）
-NAVY, CARD, BAND, LINE, RED, GREEN, WHITE = "#1E4B78", "#FFFDF8", "#171614", "#D9D2C3", "#B3342B", "#1D7A4A", "#FFFFFF"
-def icon(size, safe=1.0):
-    k = 4; S = size * k
-    im = Image.new('RGB', (S, S), NAVY); d = ImageDraw.Draw(im)
-    def box(x0, y0, x1, y1):
-        f = lambda v: (0.5 + (v - 0.5) * safe) * S
-        return [f(x0), f(y0), f(x1), f(y1)]
-    r = lambda v: v * safe * S
-    d.rounded_rectangle(box(0.22, 0.16, 0.78, 0.84), radius=r(0.06), fill=CARD)
-    d.rounded_rectangle(box(0.22, 0.16, 0.78, 0.34), radius=r(0.06), fill=BAND)
-    d.rectangle(box(0.22, 0.28, 0.78, 0.34), fill=BAND)
-    d.rounded_rectangle(box(0.29, 0.22, 0.56, 0.28), radius=r(0.02), fill=WHITE)
-    for y in (0.42, 0.52):
-        d.rounded_rectangle(box(0.29, y, 0.71, y + 0.045), radius=r(0.022), fill=LINE)
-    d.rounded_rectangle(box(0.29, 0.62, 0.55, 0.74), radius=r(0.03), fill=RED)
-    cx, cy, cr = 0.655, 0.68, 0.085
-    d.ellipse(box(cx - cr, cy - cr, cx + cr, cy + cr), fill=GREEN)
-    pts = [box(x, y, x, y)[:2] for x, y in ((0.615, 0.68), (0.645, 0.71), (0.70, 0.645))]
-    d.line(pts, fill=WHITE, width=int(r(0.028)), joint='curve')
-    for p in (pts[0], pts[2]):
-        w = r(0.014); d.ellipse([p[0] - w, p[1] - w, p[0] + w, p[1] + w], fill=WHITE)
-    return im.resize((size, size), Image.LANCZOS)
+# 圖示：發包人選用的 1024 原檔（build/icon_source/01_silver_gold.png，不覆蓋）縮出各尺寸
+ICON_SRC = Path(__file__).resolve().parent / 'icon_source' / '01_silver_gold.png'
+ICON_SHA = '4a4e4ebb31f3bc98b5958f4619d737505dd3f080d32db56132299e967f5ff039'
+if hashlib.sha256(ICON_SRC.read_bytes()).hexdigest() != ICON_SHA: raise SystemExit('App 圖示原檔被改過，和發包人選的不同')
+icon_src = Image.open(ICON_SRC).convert('RGB')
+def icon(size):
+    return icon_src.resize((size, size), Image.LANCZOS)
+# maskable：原圖縮到 74%、外圍補背景色（原圖最外圈的中位數色），交界 6% 漸層（不碰到離邊最近約 7% 的手），內容都在中心半徑 40% 的安全圓內
+MASK_SCALE = 0.74
+def icon_maskable(size):
+    n = icon_src.width
+    edge = [icon_src.getpixel((x, y)) for x in range(n) for y in (0, n - 1)] + [icon_src.getpixel((x, y)) for y in range(n) for x in (0, n - 1)]
+    bg = tuple(sorted(c[i] for c in edge)[len(edge) // 2] for i in range(3))
+    inner = round(size * MASK_SCALE)
+    im = Image.new('RGB', (size, size), bg)
+    fg = icon_src.resize((inner, inner), Image.LANCZOS)
+    feather = max(2, round(inner * 0.06))
+    mask = Image.new('L', (inner, inner), 0); md = ImageDraw.Draw(mask)
+    for k in range(feather): md.rectangle([k, k, inner - 1 - k, inner - 1 - k], outline=round(255 * (k + 1) / feather))
+    md.rectangle([feather, feather, inner - 1 - feather, inner - 1 - feather], fill=255)
+    off = (size - inner) // 2
+    im.paste(fg, (off, off), mask)
+    return im
 (out / 'icons').mkdir()
 icon(192).save(out / 'icons/icon-192.png'); icon(512).save(out / 'icons/icon-512.png')
-icon(512, 0.8).save(out / 'icons/icon-512-maskable.png'); icon(180).save(out / 'icons/apple-touch-icon.png')
+icon_maskable(512).save(out / 'icons/icon-512-maskable.png'); icon(180).save(out / 'icons/apple-touch-icon.png')
 # 版本編號＝所有檔案內容的雜湊（內容一變就換）
 files = sorted(p for p in out.rglob('*') if p.is_file() and p.name != 'sw.js')
 h = hashlib.sha256()
