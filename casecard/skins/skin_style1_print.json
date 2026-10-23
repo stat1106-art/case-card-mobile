@@ -1,0 +1,9 @@
+{"id":"style1_print","name":"黑色金屬（列印版）",
+ "bg":{"type":"solid","center":"FFFFFF",
+   "slab":{"color":"F0F0F0","points":[[0.70,1.0],[1.0,1.0],[1.0,0.62]]}},
+ "colors":{"dk1":"0E0E10","lt1":"FFFFFF","dk2":"3A3A3E","lt2":"F2F2F2",
+   "accent1":"9C7A10","accent2":"5A5A5E","accent3":"5C5C5C","accent4":"D6D6D6","accent5":"F0F0F0","accent6":"E8B931",
+   "hlink":"9C7A10","folHlink":"5A5A5E"},
+ "title":{"size":30,"bold":true,"color":"tx1"},
+ "subtitle":{"size":13,"color":"accent3"},
+ "decor":{"title_tag":true,"cover_rule":true}}

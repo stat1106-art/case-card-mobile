@@ -1,0 +1,9 @@
+{"id":"style4","name":"時間軸多色系",
+ "bg":{"type":"solid","center":"FFFFFF",
+   "rail":{"colors":["2B8FB0","1FBF8F","F2604C","3AA7E8","2F55C9"],"w":0.14}},
+ "colors":{"dk1":"1F2937","lt1":"FFFFFF","dk2":"2A3A4A","lt2":"F4F6F9",
+   "accent1":"2F55C9","accent2":"2B8FB0","accent3":"5F6B76","accent4":"DDE3EA","accent5":"1FBF8F","accent6":"F2604C",
+   "hlink":"2F55C9","folHlink":"2B8FB0"},
+ "title":{"size":30,"bold":true,"color":"tx1","spacing":3},
+ "subtitle":{"size":13,"color":"accent3"},
+ "decor":{"title_dot":true,"cover_timeline":true,"section_rail":true}}

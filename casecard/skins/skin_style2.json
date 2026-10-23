@@ -1,0 +1,8 @@
+{"id":"style2","name":"灰白深藍",
+ "bg":{"type":"hgrad","center":"F3F3F3","edge":"CBCBCB","edge_width":0.12},
+ "colors":{"dk1":"1A1A1A","lt1":"FFFFFF","dk2":"13294B","lt2":"F2F2F2",
+   "accent1":"13294B","accent2":"111111","accent3":"8C8C8C","accent4":"D6D6D6","accent5":"2E5A8C","accent6":"B8B8B8",
+   "hlink":"13294B","folHlink":"5A5A5A"},
+ "title":{"size":30,"bold":true,"color":"tx1"},
+ "subtitle":{"size":13,"color":"accent3"},
+ "decor":{"cover_band":true}}

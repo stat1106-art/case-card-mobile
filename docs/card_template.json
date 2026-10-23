@@ -1,0 +1,233 @@
+{
+  "format": "occupational-case-card-data",
+  "schema_version": 1,
+  "card": {
+    "display": {
+      "mask_natural_person_name": true,
+      "show_issues": false,
+      "keep_together": [],
+      "band_color": "#12434A"
+    },
+    "tags": [
+      "",
+      ""
+    ],
+    "title": [
+      "",
+      ""
+    ],
+    "subtitle": [
+      "",
+      ""
+    ],
+    "info": {
+      "cause": "",
+      "date_pending": false
+    },
+    "parties": {
+      "plaintiff": {
+        "role": "",
+        "name": "",
+        "natural_person": true
+      },
+      "defendant": {
+        "role": "",
+        "name": "",
+        "natural_person": false
+      }
+    },
+    "basics": [
+      [
+        "",
+        ""
+      ],
+      [
+        "",
+        ""
+      ],
+      [
+        "",
+        ""
+      ],
+      [
+        "",
+        ""
+      ]
+    ],
+    "relation": {
+      "claim": {
+        "label": "",
+        "note": ""
+      },
+      "offset": {
+        "label": "",
+        "amount": "",
+        "note": ""
+      },
+      "court": {
+        "role": "",
+        "name": ""
+      },
+      "order": {
+        "label": "",
+        "amount": ""
+      }
+    },
+    "facts": [
+      {
+        "text": "",
+        "icon": "check"
+      }
+    ],
+    "result": {
+      "total": "",
+      "lines": [
+        "",
+        "",
+        "",
+        ""
+      ],
+      "pending": "",
+      "flow": {
+        "damage_label": "",
+        "damage_total": "",
+        "fault_op": "",
+        "fault_lines": [
+          "",
+          ""
+        ],
+        "after_label": "",
+        "after_fault": "",
+        "offset_op": "",
+        "offset_lines": [
+          "",
+          ""
+        ],
+        "final_label": ""
+      },
+      "notes": ""
+    },
+    "holdings": [
+      {
+        "issue": "",
+        "head": "",
+        "body": ""
+      },
+      {
+        "issue": "",
+        "head": "",
+        "body": ""
+      },
+      {
+        "issue": "",
+        "head": "",
+        "body": ""
+      },
+      {
+        "issue": "",
+        "head": "",
+        "body": ""
+      }
+    ],
+    "advisory": [
+      {
+        "head": "",
+        "body": ""
+      },
+      {
+        "head": "",
+        "body": ""
+      },
+      {
+        "head": "",
+        "body": ""
+      },
+      {
+        "head": "",
+        "body": ""
+      }
+    ],
+    "source_card": {
+      "name": "",
+      "url": "",
+      "how": ""
+    },
+    "disclaimer": "",
+    "immutable_checks": [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "sum_checks": [
+      {
+        "parts": [
+          "",
+          ""
+        ],
+        "total": ""
+      },
+      {
+        "parts": [
+          "",
+          ""
+        ],
+        "total": ""
+      }
+    ],
+    "source_refs": {
+      "info": "",
+      "parties": "",
+      "basics": "",
+      "title": "",
+      "subtitle": "",
+      "relation": "",
+      "facts": "",
+      "result": "",
+      "pending": "",
+      "holdings": "",
+      "advisory": "",
+      "not_on_card": "",
+      "result_flow": "",
+      "timeline": ""
+    },
+    "hero": {
+      "file": "overwork_night_desk.svg",
+      "photo": "overwork_night_desk_photo.png",
+      "caption": "示意圖",
+      "origin": ""
+    },
+    "facts_anchor": "",
+    "timeline": {
+      "start": {
+        "date": "",
+        "label": "",
+        "text": ""
+      },
+      "onset": {
+        "date": "",
+        "label": "",
+        "text": ""
+      }
+    },
+    "advisory_icons": [
+      "search",
+      "group",
+      "bell",
+      "ledger"
+    ]
+  }
+}

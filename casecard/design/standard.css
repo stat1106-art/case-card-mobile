@@ -1,0 +1,162 @@
+/* CASE-CARD PoC standard 版型｜1080×1620｜字級階梯：44 / 24 / 21 / 20 / 19 / 18（最小 18px） */
+:root{
+  --bg:#F4F1EA; --card:#FFFDF8; --line:#E2DCCF; --ink:#1D1B18; --ink2:#4A453E; --ink3:#7A7368;
+  --black:#171614; --green:#1D7A4A; --green-bg:#E8F3EC; --navy:#1E4B78; --red:#B3342B;
+  --amber:#B8540F; --amber-bg:#FDF1E6; --adv:#EAF0F6; --adv-line:#C9D6E4; --adv-ink:#23456B;
+  --gut:36px; --gap:15px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1620px;overflow:hidden;background:var(--bg)}
+body{font-family:"CardSans";color:var(--ink);-webkit-font-smoothing:antialiased;font-kerning:normal;
+     text-rendering:geometricPrecision}
+#card{position:relative;width:1080px;height:1620px;display:flex;flex-direction:column;gap:var(--gap)}
+.ic{flex:none;display:block}
+
+/* ── Header ─────────────────────────── */
+.head{position:relative;height:318px;flex:none}
+.hero{position:absolute;right:0;top:0;width:503px;height:318px;object-fit:cover;display:block}
+.hero-ph{background:repeating-linear-gradient(45deg,#E9E4D9 0 14px,#E2DCCF 14px 28px);display:flex;
+  align-items:center;justify-content:center;text-align:center;font-size:20px;color:var(--ink3)}
+.head-l{position:absolute;left:var(--gut);top:26px;width:520px}
+.tags{display:flex;gap:12px}
+.tag{display:inline-flex;align-items:center;gap:8px;background:var(--black);color:#fff;
+  padding:5px 12px 5px 10px;border-radius:8px;font-size:20px;font-weight:700;line-height:28px}
+h1{margin-top:26px;font-size:44px;line-height:56px;font-weight:900;letter-spacing:.5px}
+h1 .tl{display:block;white-space:nowrap}
+.sub{margin-top:18px;font-size:20px;line-height:32px;color:var(--ink2);font-weight:500}
+.sub .sl{display:block}
+
+/* ── Box / 標題條 ────────────────────── */
+.box{background:var(--card);border:1.5px solid var(--line);border-radius:14px;margin:0 var(--gut)}
+.row{display:flex;gap:var(--gap);margin:0 var(--gut)}
+.row .box{margin:0;flex:1 1 0;min-width:0}
+.sh-row{display:flex;align-items:center;gap:12px;margin:-1.5px 0 0 -1.5px}
+.sh{display:inline-flex;align-items:center;gap:6px;background:var(--black);color:#fff;
+  padding:5px 8px;border-radius:12px 0 10px 0;font-size:21px;font-weight:700;line-height:28px}
+.lab{display:inline-block;font-size:18px;line-height:26px;font-weight:700;padding:0 10px;border-radius:13px}
+.lab-court{color:var(--green);background:var(--green-bg);border:1.5px solid #B9DCC6}
+.lab-adv{color:var(--adv-ink);background:#fff;border:1.5px solid var(--adv-line)}
+
+/* ── Info bar ────────────────────────── */
+.infobar{display:flex;flex:none;padding:14px 0}
+.ib{flex:1 1 0;text-align:center;border-left:1.5px solid var(--line)}
+.ib:first-child{border-left:0}
+.ib:nth-child(1){flex-basis:0;flex-grow:.95}.ib:nth-child(2){flex-grow:1.05}.ib:nth-child(3){flex-grow:.95}.ib:nth-child(4){flex-grow:1.05}
+.ib-k{display:flex;justify-content:center;align-items:center;gap:6px;font-size:18px;line-height:26px;color:var(--ink3);font-weight:700}
+.ib-v{margin-top:4px;font-size:20px;line-height:30px;font-weight:700;display:flex;justify-content:center;align-items:center;gap:6px}
+.pend-chip{font-size:18px;line-height:24px;padding:0 7px;border-radius:6px;color:var(--amber);background:var(--amber-bg);border:1.5px solid #EFC7A5}
+
+/* ── 案件基本資料 ─────────────────────── */
+.col{display:flex;flex-direction:column}
+.kvs{padding:14px 22px 16px}
+.kv{display:flex;gap:14px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:19px;line-height:29px}
+.kv:last-child{border-bottom:0}
+.k{flex:none;width:62px;color:var(--ink3);font-weight:700}
+.v{flex:1;font-weight:500}
+
+/* ── 法律關係圖 ─────────────────────── */
+.rel{display:flex;align-items:flex-start;justify-content:space-between;padding:22px 18px 0}
+.node{flex:none;width:118px;text-align:center}
+.bub{width:84px;height:84px;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;color:#fff}
+.bub-g{background:var(--green)}.bub-n{background:var(--navy)}
+.nr{font-size:18px;line-height:26px;color:var(--ink3);font-weight:700}
+.nn{font-size:20px;line-height:28px;font-weight:700}
+.mid{flex:1;padding:4px 6px 0;display:flex;flex-direction:column;align-items:stretch}
+.arrow-lab{text-align:center;font-size:18px;line-height:26px}
+.arrow-lab b{display:block;font-weight:700;color:var(--green)}
+.arrow-lab b.red{color:var(--red)}
+.arrow-lab span{color:var(--ink2)}
+.arr{position:relative;height:3px;margin:10px 4px}
+.arr-l{background:var(--green)}
+/* v0.6.1 方向修正：請求＝勞工→雇主（箭頭朝右） */
+.arr-l::after{content:"";position:absolute;right:-2px;top:-7px;border:8.5px solid transparent;border-left:13px solid var(--green);border-right:0}
+.arr-r{background:var(--red);margin-top:18px;margin-bottom:10px}
+/* v0.6.1 方向修正：已付補償＝雇主→勞工（箭頭朝左） */
+.arr-r::before{content:"";position:absolute;left:-2px;top:-7px;border:8.5px solid transparent;border-right:13px solid var(--red);border-left:0}
+.legend{margin:auto 18px 16px;display:flex;justify-content:center;gap:26px;font-size:18px;line-height:26px;color:var(--ink2);
+  padding-top:12px;border-top:1px dashed var(--line)}
+.lg{display:inline-block;width:26px;height:3px;vertical-align:middle;margin-right:8px;position:relative;top:-2px}
+.lg-g{background:var(--green)}.lg-r{background:var(--red)}
+
+/* ── 事實經過 ───────────────────────── */
+.facts{list-style:none;padding:12px 22px 4px}
+.facts li{display:flex;gap:12px;font-size:19px;line-height:28px;padding:5px 0}
+.num{flex:none;width:28px;height:28px;margin-top:0;border-radius:50%;background:var(--black);color:#fff;
+  font-size:18px;line-height:28px;text-align:center;font-weight:700}
+.finding{margin:auto 18px 16px;padding:10px 14px;border-radius:10px;background:var(--green-bg);border:1.5px solid #B9DCC6;
+  font-size:19px;line-height:28px;font-weight:700;display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+
+/* ── 判決結果 ───────────────────────── */
+.res-k{display:flex;align-items:center;gap:8px;margin:14px 22px 0;color:var(--green);font-size:19px;line-height:28px;font-weight:700}
+.res-total{margin:6px 22px 0;display:flex;align-items:baseline;gap:12px}
+.rt-k{font-size:19px;font-weight:700;color:var(--ink2)}
+.rt-v{font-size:36px;line-height:46px;font-weight:900;color:var(--ink);letter-spacing:.5px}
+.res{list-style:none;padding:4px 22px 0}
+.res li{position:relative;padding:4px 0 4px 18px;font-size:19px;line-height:28px}
+.res li::before{content:"";position:absolute;left:2px;top:15px;width:7px;height:7px;border-radius:50%;background:var(--ink)}
+.pending{margin:auto 18px 16px;display:flex;gap:10px;padding:10px 14px;border-radius:10px;background:var(--amber-bg);
+  border:1.5px solid #EFC7A5;color:var(--amber);font-size:19px;line-height:28px}
+.pending .ic{margin-top:3px}
+.pending b{display:block;font-weight:700}
+.pending span{color:#6B3A12}
+
+/* ── 四欄卡 ─────────────────────────── */
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:14px 16px 16px}
+.hc,.ac{border-radius:10px;padding:12px 14px 14px}
+.hc{background:#fff;border:1.5px solid var(--line)}
+.hq{font-size:18px;line-height:26px;color:var(--ink3);font-weight:500;padding-bottom:8px;margin-bottom:8px;border-bottom:1px dashed var(--line)}
+.hh,.ah{display:flex;gap:6px;align-items:flex-start;font-size:20px;line-height:28px;font-weight:700}
+.hh .ic{color:var(--green);margin-top:3px}
+.hb,.ab{margin-top:6px;font-size:18px;line-height:27px;color:var(--ink2)}
+.adv{background:var(--adv);border-color:var(--adv-line)}
+.ac{background:#fff;border:1.5px solid var(--adv-line)}
+.ah .ic{color:var(--adv-ink);margin-top:3px}
+
+/* ── 來源／免責 ─────────────────────── */
+.src{flex:none}
+.src-b{padding:10px 22px 14px;font-size:18px;line-height:26px;color:var(--ink2)}
+.src-b b{color:var(--ink);margin-right:12px}
+.src-b .sep{color:var(--ink3)}
+.draftbar{flex:none;margin:0 var(--gut);text-align:center;font-size:18px;line-height:26px;font-weight:700;color:var(--amber);
+  background:var(--amber-bg);border:1.5px dashed #E3A36F;border-radius:8px;padding:4px 0}
+.disc{flex:none;background:var(--black);color:#EDEAE3;font-size:18px;line-height:26px;text-align:center;padding:14px 40px 16px}
+
+/* ── v2 收斂 ── */
+.src-row{display:flex;align-items:flex-start;gap:16px}
+.src-row .sh-row{flex:none}
+.src-b{padding:8px 20px 10px 0}
+.draftbadge{position:absolute;right:14px;bottom:14px;background:rgba(253,241,230,.96);color:var(--amber);
+  border:1.5px solid #E3A36F;border-radius:8px;padding:6px 12px;font-size:18px;line-height:24px;font-weight:700;text-align:right}
+.hh{font-size:20px}
+
+.head{height:290px}.hero{height:290px}
+.head-l{top:22px}h1{margin-top:22px}.sub{margin-top:14px}
+#card{gap:14px}
+.infobar{padding:12px 0}
+.bub{width:72px;height:72px;margin-bottom:8px}
+.rel{padding:20px 14px 18px}
+.node{width:112px}
+.pending{display:flex;align-items:flex-start}
+.pending b{display:inline;font-weight:700;color:var(--amber)}
+.pending div{color:#6B3A12}
+h1{font-size:42px;line-height:54px;letter-spacing:0}
+
+.src-b{padding-top:9px}
+.res-total{margin:0 0 0 4px;padding-top:4px}
+.rt-v{font-size:32px;line-height:38px}
+.res{padding-top:10px}
+#card{justify-content:space-between;gap:14px}
+.arrow-lab span{display:block}
+.nb{white-space:nowrap}
+.ft{flex:1;min-width:0}
+
+/* v0.5 判決結果直式算式（讀 result.flow） */
+.ledger{margin:4px 22px 0;padding:2px 14px;border-radius:10px;background:#FAF7F0;border:1.5px solid var(--line)}
+.lg-row{display:flex;justify-content:space-between;align-items:baseline;font-size:19px;line-height:28px}
+.lg-k{color:var(--ink2);font-weight:700}
+.lg-v{font-weight:900;font-size:21px;letter-spacing:.3px}
+.lg-op{display:flex;align-items:baseline;gap:10px;padding:0 0 1px 10px;margin-left:4px;border-left:2px solid var(--line);font-size:18px;line-height:26px;color:var(--ink2)}
+.lg-op b{flex:none;font-weight:800;color:var(--ink)}
+.lg-op b.red{color:var(--red)}
+.res-note{margin:6px 22px 6px;font-size:18px;line-height:26px;color:var(--ink2)}
+#s-result .pending{margin-bottom:12px}

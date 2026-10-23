@@ -1,0 +1,4 @@
+{
+  "說明": "比對時排除的區域（x, y, 寬, 高，單位 px）。standard_original 右上示意圖暫換：原照片未進公開程式庫，改用 overwork_night_desk.svg，該格不比對（草稿標記也在這格裡，一併排除）。",
+  "standard_original.png": [[577, 0, 503, 290, "示意圖暫換"]]
+}

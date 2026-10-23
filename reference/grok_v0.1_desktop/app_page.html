@@ -1,0 +1,59 @@
+<!doctype html><html lang="zh-Hant-TW"><head><meta charset="utf-8"><title>職災小卡</title>
+<style>
+body{font-family:"Microsoft JhengHei","Noto Sans CJK TC",sans-serif;margin:0;display:flex;height:100vh;background:#f4f4f2}
+#left{width:360px;padding:16px;background:#fff;border-right:1px solid #ddd;overflow:auto;box-sizing:border-box}
+#right{flex:1;padding:16px;overflow:auto}
+h1{font-size:20px;margin:0 0 12px} h2{font-size:15px;margin:16px 0 6px}
+.case{display:block;padding:6px 4px;border-bottom:1px solid #eee} .bad{color:#b00020}
+select,button{font-size:15px;padding:4px 8px} button{margin:4px 4px 4px 0;cursor:pointer}
+.note{color:#666;font-size:13px} .warn{background:#fff3cd;padding:8px;border:1px solid #e0c060;margin:8px 0}
+.okmsg{background:#e6f4ea;padding:8px;border:1px solid #8bc59b;margin:8px 0}
+img{max-height:82vh;border:1px solid #ccc;background:#fff}
+</style></head><body>
+<div id="left">
+<h1>職災小卡</h1>
+<h2>1. 選案例</h2><div id="cases"></div>
+<button id="reload">重新讀取</button>
+<h2>2. 選版型、選風格</h2>
+<div>版型：<select id="tpl"></select></div>
+<div style="margin-top:6px">風格：<select id="skin"></select> <span id="skinnote" class="note"></span></div>
+<h2>3. 草稿標記</h2>
+<label><input type="checkbox" id="draft" checked> 圖右上角加上「草稿」</label>
+<p class="note" id="disc"></p>
+<button id="go">產生小卡</button>
+</div>
+<div id="right"><div id="msg" class="note">請先在左邊選案例，再按「產生小卡」。</div>
+<div id="result"></div><div id="dlbox"></div><img id="pic" style="display:none" alt="小卡"></div>
+<script>
+const $=id=>document.getElementById(id);
+async function load(){
+  const o=await (await fetch('/api/options',{cache:'no-store'})).json();
+  const keep=(document.querySelector('input[name=c]:checked')||{}).value;
+  $('cases').innerHTML='';
+  o.cases.forEach((c,i)=>{const l=document.createElement('label');l.className='case'+(c.ok?'':' bad');
+    l.innerHTML=c.ok?`<input type="radio" name="c" value="${c.file}"> `:'';
+    l.append(c.ok?c.title:`${c.file}（${c.note}）`);$('cases').append(l);});
+  const r=[...document.querySelectorAll('input[name=c]')];
+  (r.find(x=>x.value===keep)||r[0]||{}).checked=true;
+  if(!$('tpl').options.length){o.templates.forEach(t=>$('tpl').add(new Option(t.name,t.id)));
+    o.skins.forEach(s=>$('skin').add(new Option(s.name,s.id)));}
+  $('disc').textContent=o.disclaimer; tplChange();
+  $('msg').textContent=r.length?'案例清單已讀取。':'cases 資料夾裡沒有可以用的案例。';
+}
+function tplChange(){const c=$('tpl').value==='classic';$('skin').disabled=!c;
+  if(!c)$('skin').value='original';$('skinnote').textContent=c?'':'只有新第一版可以換風格';}
+$('tpl').onchange=tplChange;$('reload').onclick=load;
+$('go').onclick=async()=>{const c=document.querySelector('input[name=c]:checked');
+  if(!c){$('msg').textContent='請先選一個案例。';return;}
+  $('msg').textContent='產生中，請稍候……';$('result').innerHTML='';$('dlbox').innerHTML='';$('pic').style.display='none';$('go').disabled=true;
+  try{const r=await (await fetch('/api/generate',{method:'POST',body:JSON.stringify({file:c.value,template:$('tpl').value,skin:$('skin').value,draft:$('draft').checked})})).json();
+    if(r.error){$('msg').textContent=r.error;return;}
+    $('msg').textContent='';
+    if(r.failed.length){$('result').innerHTML=`<div class="warn"><b>檢查沒過（${r.failed.length} 項），請修改案例內容：</b><ul>${r.failed.map(f=>'<li>'+f+'</li>').join('')}</ul>下面的圖照原樣產生，讓你看哪裡超出；文字沒有被縮小或刪減。</div>`;}
+    else{$('result').innerHTML=`<div class="okmsg">檢查全部通過（${r.total} 項）</div>`;}
+    const src='/image/'+r.image;$('pic').src=src;$('pic').style.display='block';
+    $('dlbox').innerHTML=`<a id="dl" href="${src}?dl=1&name=${encodeURIComponent(r.name)}" download="${r.name}"><button>下載</button></a>`;
+  }finally{$('go').disabled=false;}
+};
+load();
+</script></body></html>

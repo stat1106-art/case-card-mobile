@@ -1,0 +1,8 @@
+{"id":"style6","name":"簡約企業藍紫",
+ "bg":{"type":"solid","center":"F4F4FA"},
+ "colors":{"dk1":"2B2B2B","lt1":"FFFFFF","dk2":"2B2F7A","lt2":"F1F1F8",
+   "accent1":"5B5FC7","accent2":"2B2F7A","accent3":"666889","accent4":"E1E2F3","accent5":"8E91DD","accent6":"C7C8EC",
+   "hlink":"5B5FC7","folHlink":"2B2F7A"},
+ "title":{"size":30,"bold":true,"color":"bg1"},
+ "subtitle":{"size":13,"color":"accent4"},
+ "decor":{"section_cards":true,"capsule":true,"header_band":true,"cover_dark":true,"section_dark":true}}
