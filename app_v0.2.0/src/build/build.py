@@ -42,7 +42,7 @@ def provenance(src, need):
     if not pv.is_file(): raise SystemExit(f'{src.name} 沒有同名的來源紀錄 {pv.name}，不准放進網站')
     d = json.loads(pv.read_text(encoding='utf-8'))
     miss = [k for k in need if not str(d.get(k) or '').strip()]
-    if miss: raise SystemExit(f'{pv.name} 缺：{"、".join(miss)}（沒有發包人核准日期的圖不准放進網站）')
+    if miss: raise SystemExit(f'{pv.name} 缺：{"、".join(miss)}（來源紀錄不完整、或沒有發包人核准日期的圖，不准放進網站）')
     try: _dt.date.fromisoformat(str(d['approved_date']))
     except ValueError: raise SystemExit(f'{pv.name} 的核准日期格式要寫成 2026-10-23：{d["approved_date"]!r}')
     return pv
@@ -51,7 +51,7 @@ used = {}
 for p in sorted(CASES.glob('*.json')):
     try: hero = (json.loads(p.read_text(encoding='utf-8')).get('card') or {}).get('hero') or {}
     except Exception: continue   # 壞掉的案例檔由 App 標示「讀不出來」
-    if hero.get('photo'): used[('photo', hero['photo'])] = p.name
+    if hero.get('photo') and not hero.get('image'): used[('photo', hero['photo'])] = p.name   # 有情境圖時照片用不到，不收
     if hero.get('image'): used[('image', hero['image'])] = p.name
 for (kind, name), case_file in sorted(used.items()):
     src = hero_src(name)
