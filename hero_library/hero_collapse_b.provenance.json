@@ -1,0 +1,17 @@
+{
+  "file": "hero_collapse_b.png",
+  "type": "collapse",
+  "variant": "b",
+  "role": "備用",
+  "author": "GPT 內建生圖",
+  "date": "2026-10-24",
+  "date_note": "畫圖日期取自發包人傳來壓縮檔內的檔案日期",
+  "approved_by": "發包人",
+  "approved_date": "2026-10-24",
+  "size": [
+    1536,
+    1024
+  ],
+  "sha256": "f1d88a1066ee10f0e1ee12aacc76804bb58d0a8fa3ac6665a9b5a7869314c83f",
+  "note": "AI 生成情境示意，不是真實事故、公司現場或判決證據；不能當成作業安全規範示範。"
+}

@@ -1,0 +1,17 @@
+{
+  "file": "hero_traffic_b.png",
+  "type": "traffic",
+  "variant": "b",
+  "role": "備用",
+  "author": "GPT 內建生圖",
+  "date": "2026-10-24",
+  "date_note": "畫圖日期取自發包人傳來壓縮檔內的檔案日期",
+  "approved_by": "發包人",
+  "approved_date": "2026-10-24",
+  "size": [
+    1536,
+    1024
+  ],
+  "sha256": "7492a20e7563995e06e29143080109e2caa2dd361311337b9b21ac2ab418cffc",
+  "note": "AI 生成情境示意，不是真實事故、公司現場或判決證據；不能當成作業安全規範示範。"
+}

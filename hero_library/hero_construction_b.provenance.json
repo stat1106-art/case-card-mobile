@@ -1,0 +1,17 @@
+{
+  "file": "hero_construction_b.png",
+  "type": "construction",
+  "variant": "b",
+  "role": "備用",
+  "author": "GPT 內建生圖",
+  "date": "2026-10-24",
+  "date_note": "畫圖日期取自發包人傳來壓縮檔內的檔案日期",
+  "approved_by": "發包人",
+  "approved_date": "2026-10-24",
+  "size": [
+    1536,
+    1024
+  ],
+  "sha256": "97aeada4fbf100c05ebfa01b3e6c44399a6b77a65c9d7e8a397f457234737c9e",
+  "note": "AI 生成情境示意，不是真實事故、公司現場或判決證據；不能當成作業安全規範示範。"
+}

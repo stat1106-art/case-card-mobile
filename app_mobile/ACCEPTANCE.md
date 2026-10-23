@@ -1,3 +1,11 @@
+# 驗收結果 v0.3.0（打包編號 01aa97fa82，示意圖圖庫補齊 14 類）
+
+- 發包人核准壓縮檔 2～4：chemical、collapse、electric、traffic、commute、construction、heat、disease、healthcare、neutral、stress 各 a／b，共 22 張（核准日期 2026-10-24，GPT 內建生圖，_a 主用 _b 備用），放入 `hero_library/`，每張有來源紀錄。
+- 14 類 `_a` 全部上線（裁成 503×290 JPEG，每張 25～45KB，共約 0.5MB）；離線快取 75 個檔。沒寫類型或類型打錯的案例仍用 overwork_a 並註明「示意圖尚未配置」。
+- 重跑：類型選圖（heat 改用自己的圖、沒寫類型仍用 overwork＋註明）、原本整套測試、overlap_check、貼上案例驗收 **全部通過**（Chromium，模擬 iPhone）。
+
+---
+
 # 驗收結果 v0.3.0（打包編號 f40730f555，示意圖圖庫第一批）
 
 - 放入 `hero_library/`：hero_overwork_a／b、hero_fall_a／b、hero_machine_a／b（1536×1024，發包人 2026-10-24 核准，畫圖 GPT 內建生圖；畫圖日期取自壓縮檔內檔案日期 2026-10-24）。每張有同名來源紀錄（type、variant、role、author、date、approved_by、approved_date、sha256）。

@@ -6,8 +6,8 @@ serve, out = Path(sys.argv[1]), Path(sys.argv[2])
 srv = subprocess.Popen([sys.executable, "-m", "http.server", "8827", "--bind", "127.0.0.1", "-d", str(serve)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL); time.sleep(1)
 B64 = """async()=>{const b=window.__app.current.blob;const u=new Uint8Array(await b.arrayBuffer());let s='';for(let i=0;i<u.length;i+=32768)s+=String.fromCharCode.apply(null,u.subarray(i,i+32768));return btoa(s)}"""
 H = serve / "repo/hero_library"
-imgs = {k: Image.open(H / f).convert("RGB").crop((0, 0, 503, 262)) for k, f in (("r9", "overwork_night_desk_photo.card.jpg"), ("fall", "type_fall.card.jpg"), ("machine", "type_machine.card.jpg"), ("overwork", "type_overwork.card.jpg"))}
-EXPECT = {"shilin_110_laosu_72.json": ("r9", False), "t_fall.json": ("fall", False), "t_machine.json": ("machine", False), "t_heat.json": ("overwork", True), "t_none.json": ("overwork", True)}
+imgs = {k: Image.open(H / f).convert("RGB").crop((0, 0, 503, 262)) for k, f in (("r9", "overwork_night_desk_photo.card.jpg"), ("fall", "type_fall.card.jpg"), ("machine", "type_machine.card.jpg"), ("heat", "type_heat.card.jpg"), ("overwork", "type_overwork.card.jpg"))}
+EXPECT = {"shilin_110_laosu_72.json": ("r9", False), "t_fall.json": ("fall", False), "t_machine.json": ("machine", False), "t_heat.json": ("heat", False), "t_none.json": ("overwork", True)}
 ok = True
 try:
     with sync_playwright() as p:

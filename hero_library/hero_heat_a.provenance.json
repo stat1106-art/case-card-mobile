@@ -1,0 +1,17 @@
+{
+  "file": "hero_heat_a.png",
+  "type": "heat",
+  "variant": "a",
+  "role": "主用",
+  "author": "GPT 內建生圖",
+  "date": "2026-10-24",
+  "date_note": "畫圖日期取自發包人傳來壓縮檔內的檔案日期",
+  "approved_by": "發包人",
+  "approved_date": "2026-10-24",
+  "size": [
+    1536,
+    1024
+  ],
+  "sha256": "4c8bd6b8515b594acfa2fe246a8a574c57447cf3cd9731887705bf899ffd5317",
+  "note": "AI 生成情境示意，不是真實事故、公司現場或判決證據；不能當成作業安全規範示範。"
+}
