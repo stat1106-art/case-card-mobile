@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 const APP_VERSION = '0.3.0';
-const BUILD = '01aa97fa82';
+const BUILD = '615b882937';
 // 壞檔在清單上的標示（驗收第 10 條的用字）；要換字只改這裡
 const BROKEN_LABEL = '這個案例讀不出來';
 const DISCLAIMER = '案例內容由 AI 整理，正式使用前請自己對照判決核對。';
@@ -38,6 +38,10 @@ const HERO_FALLBACK_TYPE = 'overwork';
 const HERO_NOT_SET = '示意圖尚未配置';
 // 新第一版、淺色版放情境圖時，SVG 插畫的位置換成這個空位（填滿右上那一格），存圖時再把圖疊上去
 const HERO_SLOT = '<div id="hero-slot" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%"></div>';
+// 新第一版放示意圖時，右上那一格改成內縮的圓角小卡（寬 400×高 231，和原本 503×290 同比例）：
+// 右緣對齊下面各區塊（距右 56px）、下緣停在資訊列上方，圖不再被資訊列蓋住；其他區塊位置不變。
+const HERO_INSET_CLASSIC = { from: 'right: 0; top: 0; width: 503px; height: 290px; overflow: hidden; background: #DCE6F0',
+  to: 'right: 56px; top: 18px; width: 400px; height: 231px; overflow: hidden; background: #DCE6F0; border-radius: 14px' };
 const $ = id => document.getElementById(id);
 const BASE = new URL('./', location.href).href;   // 相對路徑：放在 GitHub Pages 子目錄也能用
 let SKINS = {}, CASES = [], current = null;       // current = {blob, url, name}
@@ -206,7 +210,10 @@ async function generate() {
       heroNote = own || typed ? '' : HERO_NOT_SET;
       if (template === 'standard') {
         assets.heroPhotoUrl = BASE + (image || DEFAULT_PHOTO);
-      } else if (image) { assets.heroSvg = HERO_SLOT; assets.heroImageUrl = BASE + image; }
+      } else if (image) {
+        assets.heroSvg = HERO_SLOT; assets.heroImageUrl = BASE + image;
+        if (template === 'classic') assets.heroInset = HERO_INSET_CLASSIC;   // 新第一版：圖縮小內縮，不被資訊列蓋住
+      }
       else {
         const svg = await firstOk([hero.file && /\.svg$/i.test(hero.file) && 'hero_library/' + safeName(hero.file), DEFAULT_SVG]);
         assets.heroSvg = await getText(svg);
