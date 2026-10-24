@@ -25,10 +25,16 @@ def gen(pg, t, s="original", name=None):
     res = pg.text_content("#result")
     if name: (out / name).write_bytes(base64.b64decode(pg.evaluate(B64)))
     return res
-def hero_same(png, ref_img):
-    # 只比資訊列以上（y < 262）：新第一版的資訊列本來就壓在那一格下緣
-    box = Image.open(png).convert("RGB").crop((577, 0, 1080, 262))
-    return sum(ImageChops.difference(box, ref_img.crop((0, 0, 503, 262))).convert("L").histogram()[:13]) / (503 * 262) * 100
+# 右上圖在各版型的位置：新第一版是內縮的 400×231 圓角小卡（624,18）～（1024,249），淺色與原版是 503×290 貼齊右上（只比資訊列以上 262）
+def hero_region(png_img, ref_img, template):
+    if template == "classic":
+        box = png_img.crop((634, 28, 1014, 239)); ref = ref_img.resize((400, 231), Image.LANCZOS).crop((10, 10, 390, 221))
+    else:
+        box = png_img.crop((577, 0, 1080, 262)); ref = ref_img.crop((0, 0, 503, 262))
+    tol = 25 if template == "classic" else 13   # 新第一版的圖由瀏覽器縮成 400×231，和這裡用 PIL 縮的參考圖有細微色差
+    return sum(ImageChops.difference(box, ref).convert("L").histogram()[:tol]) / (box.width * box.height) * 100
+def hero_same(png, ref_img, template):
+    return hero_region(Image.open(png).convert("RGB"), ref_img, template)
 try:
     with sync_playwright() as p:
         b = p.chromium.launch()
@@ -57,7 +63,7 @@ try:
             n = sum(ImageChops.difference(a, bb).convert("L").histogram()[33:]) / 1080 / 1620 * 100; worst = max(worst, n)
             rec(f"(a) 貼上案例出圖 {t}/{s}", res.startswith("檢查全部通過") and n < 0.2, f"{res[:16]}｜和標準答案差>32 {n:.3f}%（右上那格排除）")
         jpg = Image.open(serve / "repo/hero_library/overwork_night_desk_photo.card.jpg").convert("RGB")
-        rec("(a) 貼上案例右上是照片（三個版型）", min(hero_same(out / f, jpg) for f in ("classic_original.png", "light_original.png", "standard_original.png")) > 85)
+        rec("(a) 貼上案例右上是照片（三個版型）", min(hero_same(out / f"{t}_original.png", jpg, t) for t in ("classic", "light", "standard")) > 85)
         # 4. 缺圖改用預設圖
         d = json.loads(shilin); d["title"] = "測試：圖檔都不存在"
         d["card"]["hero"].pop("image", None); d["card"]["hero"]["photo"] = "no_such_photo.png"; d["card"]["hero"]["file"] = "no_such.svg"
@@ -67,7 +73,7 @@ try:
         ow = Image.open(serve / "repo/hero_library/type_overwork.card.jpg").convert("RGB")
         for t in ("standard", "classic", "light"):
             res = gen(pg, t, name=f"missing_{t}.png")
-            rec(f"缺圖：{t} 用 overwork 類型圖＋註明、照樣出圖", res.startswith("檢查全部通過") and "示意圖尚未配置" in res and hero_same(out / f"missing_{t}.png", ow) > 85, res[:16])
+            rec(f"缺圖：{t} 用 overwork 類型圖＋註明、照樣出圖", res.startswith("檢查全部通過") and "示意圖尚未配置" in res and hero_same(out / f"missing_{t}.png", ow, t) > 85, res[:16])
         # (c) 重開還在
         pg.reload(); pg.wait_for_selector("input[name=c]")
         n_p = sum(x.endswith("（貼上）") for x in labels(pg))

@@ -29,7 +29,7 @@ try:
         n = pg.evaluate("async()=>{const ks=await caches.keys();let n=0;for(const k of ks){n+=(await (await caches.open(k)).keys()).length}return [ks,n]}")
         rec("快取清單全部裝好（75 個）", n[1] >= 75, n)
         rec("照片在離線快取裡", pg.evaluate("async()=>{for(const k of await caches.keys()){for(const r of await (await caches.open(k)).keys()){if(/photo/i.test(r.url))return true}}return false}"))
-        rec("版本號", "01aa97fa82" in pg.text_content("#ver"), pg.text_content("#ver"))
+        rec("版本號", "615b882937" in pg.text_content("#ver"), pg.text_content("#ver"))
         for t, s in JOBS:
             res = gen(pg, t, s, f"{t}_{s}.png")
             rec(f"出圖 {t}/{s}", res.startswith("檢查全部通過"), res)

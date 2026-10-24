@@ -101,6 +101,13 @@ async function loadImage(url) {
   try { await img.decode(); } catch (e) { /* 部分瀏覽器不支援 */ }
   return img;
 }
+// 右上那一格的外框（有圓角就照圓角）；不用 ctx.roundRect，舊一點的 Safari 沒有
+function heroPath(ctx, { x, y, w, h, r }) {
+  r = Math.min(r || 0, w / 2, h / 2);
+  ctx.beginPath(); ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
 // 照 CSS object-fit: cover（置中裁切）畫進框裡
 function drawCover(ctx, { img, x, y, w, h }) {
   const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
@@ -118,6 +125,10 @@ async function renderCard(opts) {
   const { kase, template, skin, draft, skinsById, assets, base, host } = opts;
   const prep = EN.prepare(kase, template, skin, draft, skinsById, assets, n => '@@' + n);
   prep.html = desktopBorders(prep.html);
+  if (assets.heroInset) {   // 右上那一格改位置與大小（只動這一格的樣式，其他版面不變）
+    if (prep.html.split(assets.heroInset.from).length !== 2) throw new Error('找不到右上那一格的樣式');
+    prep.html = prep.html.replace(assets.heroInset.from, assets.heroInset.to);
+  }
   const checks = prep.checks.slice();
   const fontUrl = f => base + 'fonts/' + f;
   const html = swapFonts(prep.html, fontUrl, 'html{-webkit-text-size-adjust:100%;text-size-adjust:100%}');
@@ -170,7 +181,8 @@ async function renderCard(opts) {
     const slot = doc.getElementById('hero-slot');
     if (!slot) throw new Error('找不到右上的圖的位置');
     const rc = slot.getBoundingClientRect();
-    hero = { img: await loadImage(assets.heroImageUrl), x: rc.left, y: rc.top, w: rc.width, h: rc.height };
+    const radius = parseFloat(getComputedStyle(slot.parentElement).borderTopLeftRadius) || 0;
+    hero = { img: await loadImage(assets.heroImageUrl), x: rc.left, y: rc.top, w: rc.width, h: rc.height, r: radius };
   } else if (assets.heroPhotoUrl && !assets.heroPhotoUrl.startsWith('data:')) {   // 原版：img.hero
     const tag = `<img class="hero" src="${assets.heroPhotoUrl}" alt="">`;
     if (!svgHtml.includes(tag)) throw new Error('找不到右上的圖的位置');
@@ -194,8 +206,8 @@ async function renderCard(opts) {
   let prev = null;
   for (let i = 0; i < 8; i++) {
     ctx.clearRect(0, 0, EN.W, EN.H); ctx.drawImage(img, 0, 0, EN.W, EN.H);
-    if (hero) drawCover(ctx, hero);
-    if (topImg) { ctx.save(); ctx.beginPath(); ctx.rect(hero.x, hero.y, hero.w, hero.h); ctx.clip(); ctx.drawImage(topImg, 0, 0, EN.W, EN.H); ctx.restore(); }
+    if (hero) { ctx.save(); heroPath(ctx, hero); ctx.clip(); drawCover(ctx, hero); ctx.restore(); }
+    if (topImg) { ctx.save(); heroPath(ctx, hero); ctx.clip(); ctx.drawImage(topImg, 0, 0, EN.W, EN.H); ctx.restore(); }
     const d = ctx.getImageData(0, 0, EN.W, EN.H).data;
     let h = 0; for (let j = 0; j < d.length; j += 397) h = (h * 31 + d[j]) | 0;
     if (prev !== null && h === prev && i >= 2) break;
