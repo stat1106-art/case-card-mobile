@@ -17,14 +17,9 @@
 <body>
 <main id="app">
 <h1>職災小卡</h1>
+<div id="userview">
 <section>
 <h2>1. 選案例</h2>
-<div class="paste">
-<label for="paste" class="pastelabel">貼上案例（把整段小卡資料貼進來，前後有說明文字也沒關係）</label>
-<textarea id="paste" rows="4" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="在這裡貼上小卡資料"></textarea>
-<button id="addpaste" type="button" class="sub">加入</button>
-<p id="pastemsg" class="note" aria-live="polite"></p>
-</div>
 <div id="cases"></div>
 <button id="reload" type="button" class="sub">重新讀取</button>
 </section>
@@ -46,7 +41,23 @@
 <img id="pic" alt="小卡">
 <button id="save" type="button" class="main">存到照片</button>
 </div>
-<p id="ver" class="ver"></p>
+</div>
+<div id="adminview" hidden>
+<section>
+<h2>管理：貼上 GPT 回覆</h2>
+<label for="paste" class="pastelabel">把 GPT 的回覆整段貼進來（前後說明文字、圍欄、「情境圖：」那一行都沒關係），一次可以好幾案。</label>
+<textarea id="paste" rows="6" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="在這裡貼上 GPT 的回覆"></textarea>
+<button id="addpaste" type="button" class="main">加入</button>
+<p id="pastemsg" class="note" aria-live="polite"></p>
+</section>
+<section>
+<h2>這支手機加入的案例（僅本機）</h2>
+<p class="note">只存在這支手機，不會出現在同仁的手機上。要給同仁用，請把 GPT 回覆轉給維護人員正式上架。</p>
+<div id="localcases"></div>
+</section>
+<button id="closeadmin" type="button" class="sub">回到小卡</button>
+</div>
+<p class="ver"><span id="ver"></span><button id="adminlink" type="button" class="adminlink">管理</button></p>
 </main>
 <div id="full" hidden>
 <p class="hint">長按圖片 → 加入照片</p>

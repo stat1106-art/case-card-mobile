@@ -1,7 +1,7 @@
 /* 職災小卡 手機版：畫面流程沿用 v0.1 電腦版，只把出圖改成在瀏覽器裡做。 */
 (function () {
 'use strict';
-const APP_VERSION = '0.3.0';
+const APP_VERSION = '0.4.0';
 const BUILD = '__BUILD__';
 // 壞檔在清單上的標示（驗收第 10 條的用字）；要換字只改這裡
 const BROKEN_LABEL = '這個案例讀不出來';
@@ -20,14 +20,16 @@ const MSG = {
   badSkin: '風格不正確，請重新選擇。',
   oops: '發生問題，請再試一次。',
   listFail: '案例清單讀不出來，請按「重新讀取」再試一次。',
-  pasteEmpty: '請先把小卡資料貼進上面的框。',
-  pasteBad: '貼上的內容不是小卡資料',
+  pasteEmpty: '請先把 GPT 的回覆貼進上面的框。',
+  pasteBad: '這段回覆裡沒有小卡資料，請確認 GPT 的圖卡門檻是『可供圖卡使用』',
+  pasteIncomplete: '段小卡資料缺少判決來源或圖卡內容，沒有加入',
+  localNone: '這支手機目前沒有自己加入的案例。',
   pasteOk: '已加入：',
   pasteMemOnly: '這台手機存不住，關掉就不見',
   pasteDeleted: '已刪除：',
 };
 const PASTE_KEY = 'pastedCases';
-const PASTE_TAG = '（貼上）';
+const PASTE_TAG = '（僅本機）';
 // 找不到圖時的預設圖：原版用 r9 照片（打包時一定會放、已裁好），新第一版與淺色用 SVG 插畫
 const DEFAULT_PHOTO = 'hero_library/overwork_night_desk_photo.card.jpg';
 const DEFAULT_SVG = 'hero_library/overwork_night_desk.svg';
@@ -45,7 +47,8 @@ const HERO_INSET_CLASSIC = { from: 'right: 0; top: 0; width: 503px; height: 290p
 const $ = id => document.getElementById(id);
 const BASE = new URL('./', location.href).href;   // 相對路徑：放在 GitHub Pages 子目錄也能用
 let SKINS = {}, CASES = [], current = null;       // current = {blob, url, name}
-let PASTED = [], pasteMemOnly = false;            // 貼上的案例 [{id, data}]
+let PASTED = [], pasteMemOnly = false;            // 管理頁貼上的案例（僅本機） [{id, data}]
+let adminSeen = false;                            // 這次打開 App 有沒有進過管理頁（進過才顯示給維護人員看的詳細資料）
 
 async function getJSON(path) {
   const r = await fetch(BASE + path, { cache: 'no-cache' });
@@ -57,24 +60,32 @@ async function getText(path) {
   if (!r.ok) throw new Error(r.status);
   return r.text();
 }
-// 從貼上的文字找出第一個完整的 JSON 物件（略過 ```json 圍欄與前後說明文字）：
-// 從每個「{」開始，照括號深度找到對應的「}」（字串裡的括號不算），能解析成物件就用它，不行就換下一個「{」。
-function extractJson(text) {
-  const s = String(text || '');
-  for (let i = s.indexOf('{'); i !== -1; i = s.indexOf('{', i + 1)) {
-    let depth = 0, inStr = false, bs = false;
+// 從貼上的 GPT 回覆找出所有小卡資料（format 為 case-card-app-case 的物件）：
+// 從每個「{」開始，照括號深度找到對應的「}」（字串裡的括號不算），能解析就收下並跳到它後面；
+// 收下的東西如果是外層包裝（例如一次好幾案），往裡面找 format 對的物件。前後說明文字、圍欄、「情境圖：」那一行都會被略過。
+function extractCases(text) {
+  const s = String(text || ''), found = [];
+  const walk = v => {
+    if (Array.isArray(v)) { v.forEach(walk); return; }
+    if (!v || typeof v !== 'object') return;
+    if (v.format === 'case-card-app-case') { found.push(v); return; }
+    Object.values(v).forEach(walk);
+  };
+  let i = s.indexOf('{');
+  while (i !== -1) {
+    let depth = 0, inStr = false, bs = false, end = -1;
     for (let j = i; j < s.length; j++) {
       const ch = s[j];
       if (inStr) { if (bs) bs = false; else if (ch === '\\') bs = true; else if (ch === '"') inStr = false; continue; }
       if (ch === '"') inStr = true;
       else if (ch === '{') depth++;
-      else if (ch === '}' && --depth === 0) {
-        try { const v = JSON.parse(s.slice(i, j + 1)); if (v && typeof v === 'object' && !Array.isArray(v)) return v; } catch (e) { /* 換下一個「{」 */ }
-        break;
-      }
+      else if (ch === '}' && --depth === 0) { end = j; break; }
     }
+    let parsed = null;
+    if (end !== -1) { try { parsed = JSON.parse(s.slice(i, end + 1)); } catch (e) { /* 換下一個「{」 */ } }
+    if (parsed !== null) { walk(parsed); i = s.indexOf('{', end + 1); } else i = s.indexOf('{', i + 1);
   }
-  return null;
+  return found;
 }
 function okCase(d) { return d && typeof d === 'object' && !Array.isArray(d) && d.card && typeof d.card === 'object' && !Array.isArray(d.card) && d.source && typeof d.source === 'object' && !Array.isArray(d.source); }
 // 圖檔名只取檔名本身（貼上的資料可能寫了路徑或奇怪字元）
@@ -121,21 +132,41 @@ function pasteTitle(d) { return String(d.title || (d.source && d.source.case_num
 function addPasted() {
   const text = $('paste').value;
   if (!text.trim()) { $('pastemsg').textContent = MSG.pasteEmpty; return; }
-  const d = extractJson(text);
-  if (!d || d.format !== 'case-card-app-case' || !okCase(d)) { $('pastemsg').textContent = MSG.pasteBad; return; }
-  const item = { id: 'pasted_' + Date.now().toString(36), data: d };
-  PASTED.push(item);
+  const found = extractCases(text);
+  if (!found.length) { $('pastemsg').textContent = MSG.pasteBad; return; }
+  const good = found.filter(okCase), bad = found.length - good.length;
+  if (!good.length) { $('pastemsg').textContent = `${bad} ${MSG.pasteIncomplete}`; return; }
+  let last = '';
+  good.forEach((d, k) => { last = 'local_' + Date.now().toString(36) + '_' + k; PASTED.push({ id: last, data: d }); });
   const saved = writePasted();
   $('paste').value = '';
-  $('pastemsg').textContent = MSG.pasteOk + pasteTitle(d) + (saved ? '' : '。' + MSG.pasteMemOnly);
-  renderList(item.id);
+  $('pastemsg').textContent = `${MSG.pasteOk}${good.length} 案：${good.map(pasteTitle).join('、')}`
+    + (bad ? `。另有 ${bad} ${MSG.pasteIncomplete}` : '') + (saved ? '' : '。' + MSG.pasteMemOnly);
+  renderList(last); renderLocal();
 }
 function deletePasted(id) {
   const item = PASTED.find(x => x.id === id);
   PASTED = PASTED.filter(x => x.id !== id);
   const saved = writePasted();
   $('pastemsg').textContent = (item ? MSG.pasteDeleted + pasteTitle(item.data) : '') + (saved ? '' : '。' + MSG.pasteMemOnly);
-  renderList();
+  renderList(); renderLocal();
+}
+// 管理頁：這支手機加入的案例＋刪除
+function renderLocal() {
+  $('localcases').innerHTML = '';
+  if (!PASTED.length) { const p = document.createElement('p'); p.className = 'note'; p.textContent = MSG.localNone; $('localcases').append(p); return; }
+  PASTED.forEach(x => {
+    const row = document.createElement('div'); row.className = 'caserow';
+    const t = document.createElement('span'); t.className = 'case'; t.textContent = pasteTitle(x.data) + PASTE_TAG;
+    const del = document.createElement('button'); del.type = 'button'; del.textContent = '刪除';
+    del.setAttribute('aria-label', '刪除 ' + pasteTitle(x.data)); del.onclick = () => deletePasted(x.id);
+    row.append(t, del); $('localcases').append(row);
+  });
+}
+function showAdmin(on) {
+  if (on) { adminSeen = true; renderLocal(); }
+  $('userview').hidden = on; $('adminview').hidden = !on; $('adminlink').hidden = on;
+  window.scrollTo(0, 0);
 }
 function allCases() {
   return CASES.concat(PASTED.map(x => ({ file: x.id, title: pasteTitle(x.data), ok: true, data: x.data, pasted: true })));
@@ -147,11 +178,7 @@ function renderList(select) {
     const l = document.createElement('label'); l.className = 'case' + (c.ok ? '' : ' bad');
     if (c.ok) { const r = document.createElement('input'); r.type = 'radio'; r.name = 'c'; r.value = c.file; l.append(r); }
     l.append(c.ok ? c.title + (c.pasted ? PASTE_TAG : '') : `${c.file}（${c.note}）`);
-    if (!c.pasted) { $('cases').append(l); return; }
-    const row = document.createElement('div'); row.className = 'caserow';
-    const del = document.createElement('button'); del.type = 'button'; del.textContent = '刪除';
-    del.setAttribute('aria-label', '刪除 ' + c.title); del.onclick = () => deletePasted(c.file);
-    row.append(l, del); $('cases').append(row);
+    $('cases').append(l);
   });
   const r = [...document.querySelectorAll('input[name=c]')];
   (r.find(x => x.value === keep) || r[0] || {}).checked = true;
@@ -169,7 +196,6 @@ async function load() {
   const n = renderList(keep);
   $('disc').textContent = DISCLAIMER; tplChange();
   $('msg').textContent = n ? MSG.loaded : MSG.none;
-  if (pasteMemOnly && PASTED.length) $('pastemsg').textContent = MSG.pasteMemOnly;
 }
 function tplChange() {
   const c = $('tpl').value === 'classic'; $('skin').disabled = !c;
@@ -226,7 +252,7 @@ async function generate() {
     if (failed.length) {
       $('result').innerHTML = `<div class="warn"><b>檢查沒過（${failed.length} 項），請修改案例內容：</b><ul>${problems.map(f => '<li>' + esc(f) + '</li>').join('')}</ul>` +
         (res.blob ? '下面的圖照原樣產生，讓你看哪裡超出；文字沒有被縮小或刪減。' : '') +
-        `<details class="diag"><summary>給維護人員看的詳細資料</summary><pre>${esc([navigator.userAgent, ...(res.diag || []), ...failed.map(x => x[0] + '：' + JSON.stringify(x[2]))].join('\n'))}</pre></details></div>`;
+        (adminSeen ? `<details class="diag"><summary>給維護人員看的詳細資料</summary><pre>${esc([navigator.userAgent, ...(res.diag || []), ...failed.map(x => x[0] + '：' + JSON.stringify(x[2]))].join('\n'))}</pre></details>` : '') + '</div>';
     } else {
       $('result').innerHTML = `<div class="okmsg">檢查全部通過（${res.checks.length} 項）</div>`;
     }
@@ -253,7 +279,7 @@ async function save() {
   }
   showFull();
 }
-$('tpl').onchange = tplChange; $('reload').onclick = load; $('addpaste').onclick = addPasted; $('go').onclick = generate; $('save').onclick = save;
+$('tpl').onchange = tplChange; $('reload').onclick = load; $('addpaste').onclick = addPasted; $('adminlink').onclick = () => showAdmin(true); $('closeadmin').onclick = () => showAdmin(false); $('go').onclick = generate; $('save').onclick = save;
 $('closefull').onclick = () => { $('full').hidden = true; };
 $('ver').textContent = `版本 ${APP_VERSION}（${BUILD}）`;
 
@@ -263,7 +289,7 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController && !reloaded) { reloaded = true; location.reload(); } });
   navigator.serviceWorker.register('sw.js').then(reg => reg.update()).catch(() => {});
 }
-window.__app = { BROKEN_LABEL, APP_VERSION, BUILD, extractJson, get current() { return current; } };
+window.__app = { BROKEN_LABEL, APP_VERSION, BUILD, extractCases, get current() { return current; } };
 PASTED = readPasted();
 CardRender.init(BASE).then(load).catch(() => { $('msg').textContent = MSG.listFail; });
 })();

@@ -136,6 +136,6 @@ pre = ['./'] + [p.relative_to(out).as_posix() for p in files if not p.name.endsw
 sw = (out / 'sw.js').read_text(encoding='utf-8').replace('__BUILD__', build).replace('__PRECACHE__', json.dumps(pre, ensure_ascii=False))
 (out / 'sw.js').write_text(sw, encoding='utf-8')
 a = (out / 'js/app.js').read_text(encoding='utf-8').replace('__BUILD__', build); (out / 'js/app.js').write_text(a, encoding='utf-8')
-(out / 'version.json').write_text(json.dumps({'version': '0.3.0', 'build': build}), encoding='utf-8')
+(out / 'version.json').write_text(json.dumps({'version': '0.4.0', 'build': build}), encoding='utf-8')
 _done.append(True)
 print('build', build, len(pre), 'files')
