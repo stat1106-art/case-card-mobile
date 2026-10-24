@@ -36,3 +36,5 @@ button:disabled{opacity:.5}
 .caserow{display:flex;align-items:center;gap:8px;border-bottom:1px solid #eee}
 .caserow .case{flex:1;border-bottom:0}
 .caserow button{min-height:44px;padding:6px 12px;font-size:15px;flex:none}
+.adminlink{min-height:0;border:0;background:none;padding:0 0 0 14px;font-size:13px;color:#999;text-decoration:underline}
+#adminview h2{font-size:17px}
