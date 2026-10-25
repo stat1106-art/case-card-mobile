@@ -65,3 +65,5 @@ body.pf-page{margin:0;background:#f4f6f2;color:#22302a;font-family:-apple-system
 @media print{
   button,.case-actions,.case-footer,.accident-buttons,.search-guide,.query-row,.copy-button,.toast{display:none!important}
 }
+.pf-external{margin-bottom:4px}
+.pf-source{margin:0 0 14px;color:#666;font-size:13px;line-height:1.6}
