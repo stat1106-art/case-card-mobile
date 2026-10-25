@@ -54,7 +54,7 @@
     el('copyCard').hidden = !found || !result.canPublish;
     el('resultBanner').className = 'check-banner ' + (found ? (result.canPublish ? 'pass' : 'fail') : 'hold');
     if (found) {
-      el('resultTitle').textContent = result.canPublish ? '可以上架' : '有 ' + result.errors.length + ' 項必修，請請 GPT 修改';
+      el('resultTitle').textContent = result.canPublish ? '可以上架' : '有 ' + result.errors.length + ' 項必修，請 GPT 修改';
       el('resultMessage').textContent = result.canPublish ? '未發現必修項目。請看完下方提醒，再複製小卡資料。' : '請把修改要求貼回 GPT 02，收到完整回覆後再檢查一次。';
       el('requiredCount').textContent = String(result.errors.length);
       el('warningsCount').textContent = String(result.warnings.length);
