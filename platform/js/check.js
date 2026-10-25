@@ -198,12 +198,19 @@ var CardCheck = (function () {
       warn('M05', '沒有過失相抵與抵充的計算欄位，本次略過這段金額算式，請人工確認判命金額。');
     } else {
       var damage = money(flow.damage_total, false), ratio = percentage(flow.fault_op);
-      var after = money(flow.after_fault, false), offset = money(flow.offset_op, false), total = money(result.total, false);
+      var offsetValue = flow.offset_op;
+      var noOffsetNote = typeof offsetValue === 'string' && /(?:（無抵充）|\(無抵充\))\s*$/.test(offsetValue);
+      if (noOffsetNote) offsetValue = offsetValue.replace(/(?:（無抵充）|\(無抵充\))\s*$/, '');
+      var after = money(flow.after_fault, false), offset = money(offsetValue, false), total = money(result.total, false);
+      var missingOffset = !hasOffset || (typeof flow.offset_op === 'string' && /^(?:無抵充|無|沒有|沒有抵充|本案無抵充)$/.test(flow.offset_op.trim()));
+      if (missingOffset) error('M05', '沒有抵充時，請 GPT 在抵充欄寫『− 0 元』，抵充說明寫『本案無抵充』。');
+      if (!hasFault) error('M05', '沒有過失相抵時，請 GPT 在過失欄寫『× 100%（無過失相抵）』。');
+      if (noOffsetNote && offset !== null && offset !== 0n) error('M05', '抵充欄寫了金額 ' + amount(offset) + ' 元又寫無抵充，前後矛盾，請 GPT 確認。');
       var bad = [];
       if (damage === null) bad.push('損害合計');
-      if (ratio === null) bad.push('過失相抵比例');
+      if (ratio === null && hasFault) bad.push('過失相抵比例');
       if (after === null) bad.push('過失相抵後金額');
-      if (offset === null) bad.push('抵充金額');
+      if (offset === null && !missingOffset) bad.push('抵充金額');
       if (total === null) bad.push('最後判命金額');
       if (bad.length) error('M05', '金額算式無法核對，請補齊或修正：' + bad.join('、') + '。金額須填整數元，比例須填百分比。');
       if (damage !== null && ratio !== null && after !== null) {
