@@ -1,10 +1,11 @@
 """右上圖疊上去後，原本壓在圖上的東西有沒有被蓋掉：新第一版的資訊列壓在那一格下緣（x 577–1024、y 262–290），
 這一條要和標準答案一樣。用法：python overlap_check.py <app_test 輸出資料夾> <reference/expected_png>"""
-import sys
+import os, sys
 from pathlib import Path
 from PIL import Image, ImageChops
 out, ref = Path(sys.argv[1]), Path(sys.argv[2])
-STRIP, LIMIT = (577, 262, 1024, 290), 200   # 容許字邊緣反鋸齒的少數點
+STRIP = (577, 262, 1024, 290)
+LIMIT = int(os.environ.get("OVERLAP_LIMIT", "200"))   # 容許字邊緣反鋸齒的少數點；CI 主機渲染不同，用環境變數放寬
 bad = 0
 for e in sorted(ref.glob("classic_*.png")):
     a, b = Image.open(e).convert("RGB").crop(STRIP), Image.open(out / e.name).convert("RGB").crop(STRIP)

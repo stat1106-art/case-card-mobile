@@ -44,6 +44,10 @@ jobs:
 
       - name: 打包與完整檢查
         if: steps.paths.outputs.cases_changed == 'true'
+        env:
+          # GitHub 主機字型渲染與本機不同（實測差 1.4～1.9%、資訊列 226～238 點），放寬像素比對門檻
+          PIXEL_LIMIT_PCT: "3"
+          OVERLAP_LIMIT: "1000"
         run: python app_mobile/src/build/ci_publish.py --out "$RUNNER_TEMP/dist" --work "$RUNNER_TEMP/ci"
 
       - name: 部署

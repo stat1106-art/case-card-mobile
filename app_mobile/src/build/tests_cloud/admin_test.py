@@ -1,6 +1,9 @@
 """v0.4.0 驗收：同仁畫面／管理頁貼上 GPT 回覆（Chromium，模擬 iPhone）。
 用法：python admin_test.py <serve 資料夾> <輸出資料夾> <士林案 json> <reference/expected_png>"""
-import base64, json, subprocess, sys, time
+import base64, json, os, subprocess, sys, time
+
+# 像素差容許值（%）：本機嚴格 0.2；GitHub 主機字型渲染略不同，CI 用環境變數放寬
+PIXEL_LIMIT_PCT = float(os.environ.get("PIXEL_LIMIT_PCT", "0.2"))
 from pathlib import Path
 from PIL import Image, ImageChops, ImageDraw
 from playwright.sync_api import sync_playwright
@@ -74,7 +77,7 @@ try:
             a = Image.open(ref / f"{t}_{s}.png").convert("RGB"); bb = Image.open(out / f"{t}_{s}.png").convert("RGB")
             for im in (a, bb): ImageDraw.Draw(im).rectangle([577, 0, 1079, 289], fill=0)
             n = sum(ImageChops.difference(a, bb).convert("L").histogram()[33:]) / 1080 / 1620 * 100
-            rec(f"(b) 僅本機案例出圖 {t}/{s}", res.startswith("檢查全部通過") and n < 0.2, f"{res[:16]}｜差>32 {n:.3f}%")
+            rec(f"(b) 僅本機案例出圖 {t}/{s}", res.startswith("檢查全部通過") and n < PIXEL_LIMIT_PCT, f"{res[:16]}｜差>32 {n:.3f}%")
         pg.screenshot(path=str(out / "b_user_after_generate.png"), full_page=True)
         # 重開還在、管理頁刪除
         pg.reload(); pg.wait_for_selector("input[name=c]")
