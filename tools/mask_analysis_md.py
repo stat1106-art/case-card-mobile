@@ -23,6 +23,13 @@ COMMON_WORDS = set("""陳述 陳稱 陳報 陳明 陳情 向第 向肇 向法 �
 簡報 簡易 簡單 高處 高度 高額 高於 高雄 高壓 高溫 高齡 金額 金錢 程序 程度 任何 任職 任意 連帶 連續 連同 方式 方面 方法 方可
 周知 周延 全部 全額 全體 全數 何時 何種 何者 何人 曾經 曾於 施工 施行 康復 管理 管制 尤其 馬上 文書 文件 包括 夏季 葉片 石材
 范圍 黃金 白天 江湖 林地 林業 余額 史實 孔洞 武器 宋體 時間 時候 莫非 段落 龍頭 韋籬 洪水 游泳 邱陵 毛額 章程 史料""".split())
+# 「曾、向、方…」既是姓也是虛詞：稱謂後面是這些字，而下一字是常見動詞，或接著是常見名詞，就不是人名
+# （「原告曾帶男性友人」「被告曾遭勞動部裁處」「被告方提出」「原告向家長檢討」）。
+# 名字裡常見的字（家、經、發…）不放單字清單，改用兩字詞，避免漏抓「原告曾家豪」這類真名。
+FUNC_CHARS = set("曾向方於經以與對就在")
+FUNC_VERBS = set("帶遭被受提經於向在對與以將已未擔表說稱要請申告訴簽給付支領收寄寫出入到去赴從依由至予拒遇獲指參因為和及該其他她自仍不無有")
+FUNC_WORDS = set("""家長 家屬 家人 家中 公司 法院 勞工 雇主 員工 同事 醫師 醫院 保險 單位 主管 學校 學生 老師 客戶 廠商 警方 警察 檢察 政府 機關
+市府 縣府 勞保 勞檢 工會 上級 下屬 對方 本人 自己 其他 他人 親友 友人 父母 子女 配偶 律師 社工 鄰居 房東 業主 承攬 派遣 該公 該院""".split())
 NAME_TAIL = set("主表到於未亦的之等說稱與及曾已則因在向對就並也均仍乃即係為請提經無有不受遭自將被由")
 ORG_END = re.compile(r"(公司|股份|有限|企業|行號|工廠|機關|政府|局|署|處|部|會|院|所|校|學|銀行|協會|基金|醫院|診所|社|團|廠)$")
 NAME = r"(?:%s|[%s])[一-龥]{1,2}" % ("|".join(COMPOUND), SURNAMES)
@@ -37,6 +44,11 @@ def candidates(text):
         sur = next((c for c in COMPOUND if name.startswith(c)), name[0])
         rest = name[len(sur):]
         if not rest or rest[0] in NOT_NAME_START or "○" in name or "〇" in name or ORG_END.search(name) or name[:2] in COMMON_WORDS:
+            continue
+        # 後面緊接○：已遮好的冠夫姓或複姓（「李林○○」），不是沒遮的名字
+        if text[m.end("name"):m.end("name") + 1] in ("○", "〇"):
+            continue
+        if sur in FUNC_CHARS and (rest[0] in FUNC_VERBS or rest[:2] in FUNC_WORDS):
             continue
         # 兩字名後面緊接動詞時會多抓一字（「原告王明主張」抓成「王明主」）：最後一字是常見的接續字就去掉
         if len(rest) == 2 and rest[1] in NAME_TAIL:
