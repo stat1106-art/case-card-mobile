@@ -18,6 +18,11 @@ ROLES = ("被上訴人", "上訴人", "原告", "被告", "證人", "鑑定人",
          "主管", "經理", "課長", "組長", "廠長", "店長", "同事", "員工", "勞工", "醫師", "負責人", "董事長", "雇主", "被害人", "死者")
 # 稱謂後面若是這些字開頭，就不是人名（「原告主張」「被告公司」…）
 NOT_NAME_START = set("主請於即係為因之與自等已未則應所等並及就對向在乃均仍亦皆再曾稱另各提起所提經無有不公機")
+# 姓氏字開頭、但常見不是人名的詞（「被告陳述」「勞工向第三人」「主管簡報」…）：稱謂後面接到這些就不算人名
+COMMON_WORDS = set("""陳述 陳稱 陳報 陳明 陳情 向第 向肇 向法 向雇 向公 向勞 向被 向原 向保 向他 向其 向對 向主 向該 向本 向漁 向醫
+簡報 簡易 簡單 高處 高度 高額 高於 高雄 高壓 高溫 高齡 金額 金錢 程序 程度 任何 任職 任意 連帶 連續 連同 方式 方面 方法 方可
+周知 周延 全部 全額 全體 全數 何時 何種 何者 何人 曾經 曾於 施工 施行 康復 管理 管制 尤其 馬上 文書 文件 包括 夏季 葉片 石材
+范圍 黃金 白天 江湖 林地 林業 余額 史實 孔洞 武器 宋體 時間 時候 莫非 段落 龍頭 韋籬 洪水 游泳 邱陵 毛額 章程 史料""".split())
 NAME_TAIL = set("主表到於未亦的之等說稱與及曾已則因在向對就並也均仍乃即係為請提經無有不受遭自將被由")
 ORG_END = re.compile(r"(公司|股份|有限|企業|行號|工廠|機關|政府|局|署|處|部|會|院|所|校|學|銀行|協會|基金|醫院|診所|社|團|廠)$")
 NAME = r"(?:%s|[%s])[一-龥]{1,2}" % ("|".join(COMPOUND), SURNAMES)
@@ -31,7 +36,7 @@ def candidates(text):
         name = m.group("name")
         sur = next((c for c in COMPOUND if name.startswith(c)), name[0])
         rest = name[len(sur):]
-        if not rest or rest[0] in NOT_NAME_START or "○" in name or "〇" in name or ORG_END.search(name):
+        if not rest or rest[0] in NOT_NAME_START or "○" in name or "〇" in name or ORG_END.search(name) or name[:2] in COMMON_WORDS:
             continue
         # 兩字名後面緊接動詞時會多抓一字（「原告王明主張」抓成「王明主」）：最後一字是常見的接續字就去掉
         if len(rest) == 2 and rest[1] in NAME_TAIL:
