@@ -1,0 +1,9 @@
+{"id":"original","name":"原版配色（米白＋黑標題條）",
+ "source":"CaseCard v0.7.0 新第一版的原有顏色，逐一列出；用來證明換成角色寫法後圖面完全不變",
+ "bg":{"type":"solid","center":"F4F1EA"},
+ "card_roles":{
+   "page":"F4F1EA","ink":"1D1B18","ink2":"4A453E","muted":"7A7368","card":"FFFDF8","line":"E2DCCF","line2":"CFC8BA",
+   "dark":"171614","on_dark":"FFFFFF","footer_text":"E8E2D6",
+   "plaintiff":"1D7A4A","defendant":"1E4B78","money":"B3342B","money_text":"FFFFFF","money_sub":"F3D3CF","deduct":"B3342B",
+   "pill_text":"1D7A4A","pill_bg":"E8F3EC","pill_line":"B9DCC6",
+   "adv_bg":"EAF0F6","adv_line":"C9D6E4","adv_ink":"23456B","adv_pill_bg":"FFFFFF","dot_fill":"FFFFFF"}}

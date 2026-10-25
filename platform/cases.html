@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<meta name="color-scheme" content="light">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="data:,">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>案例庫｜企業職災平台</title>
+<link rel="stylesheet" href="css/platform.css">
+<link rel="stylesheet" href="css/candidates.css">
+</head>
+<body class="pf-page">
+<nav class="pf-nav" aria-label="平台分頁"><ul>
+<li><a href="index.html">風險試算</a></li>
+<li><a href="cases.html" aria-current="page">案例庫</a></li>
+<li><a href="case.html">案例分析</a></li>
+<li><a href="check.html">上架前檢查</a></li>
+<li><a href="../index.html">產生圖卡</a></li>
+</ul></nav>
+<p class="pf-disclaimer">本平台為案例摘要與風險溝通參考，個案仍應以正式判決書全文及最終裁判結果為準；不構成法律意見，也不保證理賠。</p>
+<main class="pf-main">
+<h1>案例庫</h1>
+<div class="pf-tools pf-external"><a class="pf-btn" href="https://pacs.osha.gov.tw/2875/" target="_blank" rel="noopener noreferrer" aria-label="查職安署重大職災（另開新分頁）">查職安署重大職災</a></div>
+<p class="pf-source">資料來源：勞動部職業安全衛生署 重大職業災害公開網</p>
+<p class="pf-lead">列出網站上所有案例。可以搜尋、篩選，並下載索引表或單案重點。</p>
+<div class="pf-tools">
+<label>搜尋<input id="q" type="search" placeholder="標題、法院、案號、標籤、摘要" autocomplete="off"></label>
+<label>標籤<select id="tag"><option value="">全部標籤</option></select></label>
+<label>判決年度<select id="year"><option value="">全部年度</option></select></label>
+</div>
+<div class="pf-tools"><button type="button" class="pf-btn primary" id="csv">下載篩選索引 CSV</button></div>
+<p class="pf-count" id="count" role="status" aria-live="polite">讀取中……</p>
+<div id="list"></div>
+<section class="pf-candidates" aria-labelledby="candTitle">
+<h2 id="candTitle">候選判決（尚未分析）</h2>
+<p class="pf-lead">原工具查到的判決節錄，尚未做完整分析。</p>
+<div id="cand"></div>
+</section>
+</main>
+<p class="pf-version" id="pfVersion">平台版本 0.1.5</p>
+<script src="js/common.js"></script>
+<script src="js/candidates.js"></script>
+<script src="js/cases.js"></script>
+</body>
+</html>

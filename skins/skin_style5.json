@@ -1,0 +1,11 @@
+{"id":"style5","name":"莫蘭迪粉藍",
+ "bg":{"type":"solid","center":"FBF8F3",
+   "blobs":[{"color":"E8C4B6","cx":1.0,"cy":-0.04,"r":0.23,"phase":0.6},
+            {"color":"B9D6D9","cx":-0.025,"cy":1.05,"r":0.16,"phase":2.1},
+            {"color":"E8C4B6","cx":0.085,"cy":1.0,"r":0.055,"phase":4.0}]},
+ "colors":{"dk1":"3A3532","lt1":"FFFFFF","dk2":"5A524D","lt2":"F3EEE8",
+   "accent1":"A86A5C","accent2":"5A858A","accent3":"6E6763","accent4":"E6DED6","accent5":"E0B3A3","accent6":"9CC5CA",
+   "hlink":"A86A5C","folHlink":"5A858A"},
+ "title":{"size":30,"bold":true,"color":"tx1","align":"center"},
+ "subtitle":{"size":13,"color":"accent3"},
+ "decor":{"section_soft":true}}

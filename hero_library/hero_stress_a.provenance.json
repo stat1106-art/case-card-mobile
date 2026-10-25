@@ -1,0 +1,17 @@
+{
+  "file": "hero_stress_a.png",
+  "type": "stress",
+  "variant": "a",
+  "role": "主用",
+  "author": "GPT 內建生圖",
+  "date": "2026-10-24",
+  "date_note": "畫圖日期取自發包人傳來壓縮檔內的檔案日期",
+  "approved_by": "發包人",
+  "approved_date": "2026-10-24",
+  "size": [
+    1536,
+    1024
+  ],
+  "sha256": "49c8ac4428f2a82edf782aa064a4d294455a94c51a76af31c8c441ebd7cd99dd",
+  "note": "AI 生成情境示意，不是真實事故、公司現場或判決證據；不能當成作業安全規範示範。"
+}

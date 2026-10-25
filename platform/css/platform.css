@@ -1,0 +1,69 @@
+/* 平台共用：分頁列、免責聲明、版本 */
+.pf-nav{position:sticky;top:0;z-index:50;background:#173d33;padding:6px max(8px,env(safe-area-inset-left)) 6px max(8px,env(safe-area-inset-right))}
+.pf-nav ul{display:flex;gap:4px;list-style:none;margin:0 auto;padding:0;max-width:1180px}
+.pf-nav li{flex:1 1 0;min-width:0}
+.pf-nav a{display:flex;align-items:center;justify-content:center;min-height:44px;padding:4px 6px;border-radius:10px;color:#e8f2ec;text-decoration:none;font-weight:700;font-size:15px;text-align:center;line-height:1.25;font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif}
+.pf-nav a[aria-current="page"]{background:#f4f7f2;color:#173d33}
+.pf-nav a:focus-visible{outline:3px solid #9fd0b6;outline-offset:2px}
+.pf-disclaimer{margin:0;padding:10px 14px;background:#fff6e0;border-bottom:1px solid #e8d7a8;color:#5b4613;font-size:14px;line-height:1.7;text-align:center;font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif}
+.pf-version{margin:18px 0 28px;text-align:center;color:#777;font-size:13px;font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif}
+.pf-error{margin:16px;padding:14px;border:1px solid #d9a39d;background:#fff0ee;color:#8a2d24;border-radius:10px}
+@media (max-width:420px){.pf-nav a{font-size:14px;padding:4px 2px}}
+@media print{.pf-nav,.pf-disclaimer,.pf-version,.pf-noprint{display:none!important}}
+
+/* 案例庫、案例分析 */
+body.pf-page{margin:0;background:#f4f6f2;color:#22302a;font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;overflow-x:hidden;-webkit-text-size-adjust:100%}
+.pf-main{max-width:1080px;margin:0 auto;padding:16px 14px 8px;box-sizing:border-box}
+.pf-main *{box-sizing:border-box}
+.pf-main h1{font-size:24px;margin:8px 0 6px;line-height:1.4}
+.pf-main h2{font-size:20px;margin:24px 0 10px;line-height:1.45}
+.pf-lead{color:#4d5c55;line-height:1.7;margin:0 0 12px}
+.pf-tools{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0;align-items:flex-end}
+.pf-tools label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:700;color:#37473f;flex:1 1 160px;min-width:0}
+.pf-tools input,.pf-tools select{font:inherit;font-size:16px;min-height:44px;padding:8px 10px;border:1px solid #b9c8bf;border-radius:9px;background:#fff;color:#22302a;width:100%}
+.pf-btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 14px;border-radius:10px;border:1px solid #9fb8aa;background:#fff;color:#1f4d3c;font:inherit;font-size:15px;font-weight:700;text-decoration:none;cursor:pointer;text-align:center}
+.pf-btn.primary{background:#1f5c47;border-color:#1f5c47;color:#fff}
+.pf-btn:focus-visible{outline:3px solid #80ad94;outline-offset:2px}
+.pf-count{color:#4d5c55;margin:6px 0 10px}
+.pf-card{background:#fff;border:1px solid #d6e0da;border-radius:14px;padding:16px;margin:0 0 12px;overflow-wrap:anywhere}
+.pf-card h3{font-size:18px;margin:0 0 6px;line-height:1.5}
+.pf-meta{display:flex;flex-wrap:wrap;gap:6px;font-size:13px;color:#56635c;margin:6px 0}
+.pf-meta span{background:#eef3ef;border-radius:6px;padding:3px 8px}
+.pf-tags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.pf-tags span{font-size:13px;border:1px solid #c5d6cc;border-radius:999px;padding:2px 10px;color:#2b5a47}
+.pf-sub{color:#38463f;line-height:1.7;margin:6px 0}
+.pf-review{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;font-size:13px}
+.pf-review span{border-radius:6px;padding:3px 8px}
+.pf-review .ok{background:#e3f2e8;color:#1d5b3a}
+.pf-review .wait{background:#fff1d6;color:#7a5410}
+.pf-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.pf-card.bad{border-color:#e0b4ae;background:#fff7f6;color:#8a2d24}
+.pf-notice{background:#fff3d9;border:1px solid #e6c97f;color:#6d4c0f;border-radius:10px;padding:10px 12px;margin:10px 0;line-height:1.7}
+.pf-info{display:grid;grid-template-columns:max-content 1fr;gap:6px 12px;margin:8px 0;line-height:1.6}
+.pf-info dt{font-weight:700;color:#3e4d45}
+.pf-info dd{margin:0;overflow-wrap:anywhere}
+.pf-candidates .cl-card .cl-actions a{min-height:44px;display:inline-flex;align-items:center}
+.pf-candidates .cl-card summary{min-height:44px;display:flex;align-items:center}
+/* 分析內容 */
+.md{background:#fff;border:1px solid #d6e0da;border-radius:14px;padding:16px;line-height:1.8;overflow-wrap:anywhere}
+.md h1{font-size:21px}.md h2{font-size:19px;border-top:1px solid #e3e9e5;padding-top:14px}.md h3{font-size:17px}.md h4,.md h5,.md h6{font-size:16px}
+.md table{border-collapse:collapse;width:100%;margin:8px 0;display:block;overflow-x:auto}
+.md th,.md td{border:1px solid #cdd8d1;padding:6px 8px;text-align:left;vertical-align:top}
+.md th{background:#eef3ef}
+.md blockquote{margin:8px 0;padding:8px 12px;border-left:4px solid #9fb8aa;background:#f3f7f4;color:#3c4b43}
+.md ul,.md ol{padding-left:24px}
+.md p{margin:8px 0}
+
+/* 風險試算：手機上按鈕至少 44px 高；列印時不印按鈕 */
+@media (max-width:850px){
+  .mini-action,.accident-chip,.copy-button,.show-more-button,.button-ghost,.primary-button{min-height:44px}
+  .case-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;padding:0 10px}
+  .source-details>summary,.pf-candidates .cl-card summary{min-height:44px;display:flex;align-items:center}
+  .source-item a,.manager-links a{display:inline-flex;align-items:center;min-height:44px}
+  .pf-candidates .cl-actions a,.pf-candidates .cl-source a{display:inline-flex;align-items:center;min-height:44px}
+}
+@media print{
+  button,.case-actions,.case-footer,.accident-buttons,.search-guide,.query-row,.copy-button,.toast{display:none!important}
+}
+.pf-external{margin-bottom:4px}
+.pf-source{margin:0 0 14px;color:#666;font-size:13px;line-height:1.6}

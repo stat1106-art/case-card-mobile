@@ -1,0 +1,17 @@
+{
+  "file": "hero_disease_a.png",
+  "type": "disease",
+  "variant": "a",
+  "role": "主用",
+  "author": "GPT 內建生圖",
+  "date": "2026-10-24",
+  "date_note": "畫圖日期取自發包人傳來壓縮檔內的檔案日期",
+  "approved_by": "發包人",
+  "approved_date": "2026-10-24",
+  "size": [
+    1536,
+    1024
+  ],
+  "sha256": "ea59b900abb7866f02ed67701552d1353dca8a0c0497410d9cbd2bce60de819e",
+  "note": "AI 生成情境示意，不是真實事故、公司現場或判決證據；不能當成作業安全規範示範。"
+}

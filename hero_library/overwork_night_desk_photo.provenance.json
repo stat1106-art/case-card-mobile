@@ -1,0 +1,18 @@
+{
+  "file": "hero.png",
+  "size": [
+    503,
+    318
+  ],
+  "sha256": "0cfc7be57ddff20116ccf8e347cba9e90b092d7a39430e1972f25f02db158f18",
+  "origin": "由 r9 核准參考圖（SHA-256 ea591acd…9e15）裁切 x577–1080, y0–318；非原始生圖檔",
+  "contains_text": false,
+  "status": "發包人 2026-10-23 同意沿用",
+  "case": "shilin_110_laosu_72",
+  "approved_date": "2026-10-23",
+  "author": "GPT",
+  "date": "2026-07",
+  "note": "作者與日期由發包人 2026-10-23 告知（日期只到月份）",
+  "crop_focus_y": 1.0,
+  "crop_note": "2026-10-23：新第一版資訊列會壓住圖下緣約 28px，改成只裁上面（保留下緣），主體上移、手機與文件多露出"
+}

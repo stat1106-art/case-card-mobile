@@ -1,0 +1,9 @@
+{"id":"style1","name":"黑色金屬（投影版）",
+ "bg":{"type":"brushed","top":"222226","bottom":"141416","grain":3,"center":"1C1C1F",
+   "slab":{"color":"2C2C31","points":[[0.70,1.0],[1.0,1.0],[1.0,0.62]]}},
+ "colors":{"dk1":"F2F2F2","lt1":"0E0E10","dk2":"C8C8C8","lt2":"2A2A2E",
+   "accent1":"E8B931","accent2":"8C8C8C","accent3":"9A9A9A","accent4":"4A4A4F","accent5":"2C2C31","accent6":"FFFFFF",
+   "hlink":"E8B931","folHlink":"9A9A9A"},
+ "title":{"size":30,"bold":true,"color":"tx1"},
+ "subtitle":{"size":13,"color":"accent3"},
+ "decor":{"title_tag":true,"cover_rule":true}}
