@@ -143,6 +143,8 @@ def file_name(src):
 
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    md_files = [a for a in args if a.lower().endswith(".md")]
+    args = [a for a in args if a not in md_files]
     dry = "--dry-run" in sys.argv
     cases_dir = Path(sys.argv[sys.argv.index("--cases") + 1]) if "--cases" in sys.argv else ROOT / "cases"
     if "--cases" in sys.argv: args.remove(str(cases_dir))
@@ -183,6 +185,22 @@ def main():
         existing[jid] = name; index.append(name)
         t = hero["hero_type"]
         added.append((name, label, f"{t}（{HERO_TYPES[t][0]}）", how, "、".join(f"{a}→{b}" for a, b in changes) or "無自然人或已遮好"))
+    # 案例分析 .md：自然人姓名遮成「王○○」後放進 cases/（檔名要和案例檔同名，例如 tpdv_112_laosu_15.md）
+    sys.path.insert(0, str(ROOT / "tools"))
+    from mask_analysis_md import mask_text, candidates as md_left
+    md_done, md_total = [], 0
+    for path in md_files:
+        src = Path(path); text = src.read_text(encoding="utf-8")
+        for full, m in batch_changes: text = text.replace(full, m)          # 同一批小卡資料裡遮掉的全名
+        text, rep = mask_text(text)
+        n = sum(k for _, _, k in rep) + sum(src.read_text(encoding="utf-8").count(f) for f, _ in batch_changes)
+        md_total += n
+        stem = src.stem
+        if not (cases_dir / f"{stem}.json").exists() and f"{stem}.json" not in index:
+            skipped.append((src.name, "找不到同名的案例檔（.md 檔名要和案例檔一樣），沒有放")); continue
+        if md_left(text): skipped.append((src.name, "遮蔽後仍有疑似姓名，請人工處理")); continue
+        if not dry: (cases_dir / src.name).write_text(text, encoding="utf-8")
+        md_done.append((src.name, n, rep))
     if added and not dry:
         idx_path.write_text(json.dumps({"cases": sorted(set(index))}, ensure_ascii=False) + "\n", encoding="utf-8")
     print("# 上架報告" + ("（試跑，沒有寫檔）" if dry else ""))
@@ -191,6 +209,11 @@ def main():
         print(f"- {label}\n  - 檔名：{name}\n  - 示意圖：{t}，{how}\n  - 姓名遮蔽：{ch}")
     if added:
         print("\n> 當事人以外的人名（證人、主管、醫師等）工具抓不到，上架前請人工看過每一案的事實與見解。")
+    if md_done:
+        print(f"\n## 案例分析 .md {len(md_done)} 份")
+        for name, n, rep in md_done:
+            print(f"- {name}：遮蔽 {n} 處" + ("（" + "、".join(f"{a}→{b}×{k}" for a, b, k in rep) + "）" if rep else ""))
+        print(f"\n.md 已遮蔽自然人姓名，共 {md_total} 處（工具只抓得到「稱謂＋人名」與同批小卡的當事人；回報前要逐檔人工確認沒有遺漏）")
     print(f"\n## 沒上 {len(skipped)} 項")
     for label, why in skipped: print(f"- {label}：{why}")
     if notes:
