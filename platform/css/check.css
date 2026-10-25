@@ -1,0 +1,40 @@
+/* 上架前檢查：沿用平台配色，內容只在瀏覽器中呈現。 */
+.check-page [hidden]{display:none!important}
+.check-main{max-width:1040px;padding-top:28px}
+.check-header{margin-bottom:22px}
+.check-eyebrow{margin:0 0 7px;color:#496c5c;font-size:13px;font-weight:700;letter-spacing:.08em}
+.check-header h1{font-size:30px;margin:0 0 10px}
+.check-input{padding:22px}
+.check-input label,#manualCopy label{display:block;font-size:17px;font-weight:700;line-height:1.6}
+.check-help{font-size:14px;color:#56665d;line-height:1.7;margin:6px 0 12px}
+.check-input textarea,#copyText{display:block;box-sizing:border-box;width:100%;min-width:0;max-width:100%;resize:vertical;padding:14px;border:1px solid #a9bdb0;border-radius:10px;color:#243a2e;background:#fbfcfa;font:15px/1.75 -apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;overflow-wrap:anywhere;white-space:pre-wrap;word-break:break-word}
+.check-input textarea{min-height:245px}
+.check-input textarea:focus-visible,#copyText:focus-visible{outline:3px solid #a5cfb9;outline-offset:2px;border-color:#35674d}
+.check-input textarea::placeholder{color:#76867c}
+.check-input-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:16px}
+.check-privacy{flex:1 1 280px;min-width:0;margin:0 0 0 6px;color:#52675b;font-size:13px;line-height:1.7}
+.check-result{scroll-margin-top:76px}
+.check-banner{padding:21px 23px;border:1px solid #c9d7ce;border-radius:14px;background:#eef3ef;margin:20px 0 16px;overflow-wrap:anywhere}
+.check-banner h2{font-size:27px;line-height:1.45;margin:0;color:inherit}
+.check-banner h2:focus{outline:none}
+.check-banner p:last-child{margin:8px 0 0;line-height:1.75}
+.check-banner.pass{background:#e5f3e9;border-color:#8fb99d;color:#1d603c}
+.check-banner.fail{background:#fff0ed;border-color:#daa69d;color:#912e23}
+.check-banner.hold{background:#fff5df;border-color:#ddc382;color:#72551a}
+.check-banner.fail .check-eyebrow,.check-banner.hold .check-eyebrow{color:inherit}
+.check-findings{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.check-findings .pf-card{padding:20px;min-width:0;margin-bottom:0}
+.check-findings h3{display:flex;gap:8px;align-items:center;font-size:18px}
+.check-count{display:inline-flex;align-items:center;justify-content:center;min-width:25px;padding:0 7px;border-radius:20px;background:#edf2ee;font-size:13px;line-height:25px;color:#43594b}
+.check-list{list-style:none;padding:0;margin:0}
+.check-list li{line-height:1.8;padding:12px 0;border-top:1px solid #e1e8e2;font-size:15px;overflow-wrap:anywhere;word-break:break-word}
+.check-list .check-code{font-size:12px;font-weight:700;display:inline-block;line-height:1.7;border:1px solid #d4ddd5;border-radius:5px;padding:1px 6px;margin-right:7px;color:#47604e;vertical-align:baseline}
+.check-required .check-code{color:#92352d;border-color:#e6c0ba;background:#fff3f0}
+.check-list .check-empty{color:#58675e}
+.check-copy-actions{margin-top:18px}
+.check-copy-status{font-size:14px;line-height:1.7;color:#3a6049;min-height:24px;margin:8px 0}
+#manualCopy{margin-top:12px}
+#copyText{margin-top:10px;min-height:120px}
+.check-copy-buffer{position:fixed;left:0;top:0;width:1px;height:1px;padding:0;border:0;opacity:0;pointer-events:none}
+@media(max-width:700px){.check-findings{grid-template-columns:minmax(0,1fr)}.check-main{padding-top:20px}.check-header h1{font-size:27px}.check-input,.check-findings .pf-card{padding:17px}.check-banner{padding:18px}.check-banner h2{font-size:24px}.check-privacy{flex-basis:100%;margin:2px 0 0}.check-input-actions .pf-btn{flex:1 1 auto}.check-copy-actions .pf-btn{width:100%}}
+@media print{.check-input,.check-copy-actions,.check-copy-status,#manualCopy,#inputStatus{display:none!important}.check-main{padding:0}.check-findings{display:block}.check-findings .pf-card{margin-bottom:12px;break-inside:avoid}.check-banner{break-inside:avoid}}

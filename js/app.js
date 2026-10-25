@@ -184,7 +184,14 @@ function renderList(select) {
   (r.find(x => x.value === keep) || r[0] || {}).checked = true;
   return r.length;
 }
-async function load() {
+// 平台入口只可選取清單中已讀取成功的網站案例，不拿網址片段組檔案路徑。
+function caseFromHash(hash) {
+  const match = /^#case=(.+)$/.exec(hash);
+  let want = '';
+  try { want = match ? decodeURIComponent(match[1]) : ''; } catch (e) { return ''; }
+  return (CASES.find(c => c.ok === true && c.file === want) || {}).file || '';
+}
+async function load(fromNavigation) {
   const keep = (document.querySelector('input[name=c]:checked') || {}).value;
   try {
     if (!$('tpl').options.length) {
@@ -193,7 +200,7 @@ async function load() {
     }
     CASES = await loadCases();
   } catch (e) { CASES = []; $('msg').textContent = MSG.listFail; renderList(keep); return; }
-  const n = renderList(keep);
+  const n = renderList((fromNavigation === true && caseFromHash(location.hash)) || keep);
   $('disc').textContent = DISCLAIMER; tplChange();
   $('msg').textContent = n ? MSG.loaded : MSG.none;
 }
@@ -291,5 +298,7 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
 }
 window.__app = { BROKEN_LABEL, APP_VERSION, BUILD, extractCases, get current() { return current; } };
 PASTED = readPasted();
-CardRender.init(BASE).then(load).catch(() => { $('msg').textContent = MSG.listFail; });
+window.addEventListener('hashchange', () => load(true));
+CardRender.init(BASE).then(() => load(true)).catch(() => { $('msg').textContent = MSG.listFail; });
 })();
+
