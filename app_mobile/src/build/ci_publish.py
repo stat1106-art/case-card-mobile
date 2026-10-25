@@ -3,8 +3,8 @@
 用法：python app_mobile/src/build/ci_publish.py --out <網站輸出資料夾> --work <暫存資料夾>
 關卡：
   1. 案例資料夾：index.json 與檔案一致、檔名、.md 有同名 .json、格式、示意圖（hero_type 14 類或網站上有的專屬圖）、
-     自然人姓名遮蔽（小卡 parties、小卡全文、.md 全文）
-  2. 打包（build.py 本身也擋測試假案例、<script>、沒遮的 .md、照片來源紀錄）
+     小卡當事人（parties）自然人姓名遮蔽；小卡全文與 .md 全文的姓名掃描只列【提醒】、不擋部署（發包人 2026-10-25 裁定）
+  2. 打包（build.py 本身也擋測試假案例、<script>、當事人姓名沒遮、照片來源紀錄）
   3. 每案 check.js（tools/card_check.js）0 項必須修正
   4. 網站上每案 × 三個版型「檢查全部通過」、離線快取、無外部連線（tests_cloud/case_render_test.py）、平台四頁
   5. App 回歸測試：用凍結的士林案（ci/regression_cases）另外打包，跑原本整套測試（不受日後撤案影響）
@@ -35,6 +35,15 @@ def gate(name, ok, lines=()):
     return ok
 
 
+def remind(name, lines):
+    """只提醒、不算失敗：執行紀錄列【提醒】，GitHub 執行頁另外標黃色警告。"""
+    print(f"\n【提醒】{name}")
+    for l in lines:
+        print("  - " + l)
+        if os.environ.get("GITHUB_ACTIONS"): print(f"::warning title=姓名掃描提醒::{l}")
+    sys.stdout.flush()
+
+
 def strings(v):
     if isinstance(v, str): yield v
     elif isinstance(v, dict):
@@ -60,6 +69,7 @@ def check_cases():
     for f in sorted(jsons - set(index)): probs.append(f"案例檔沒有列進 index.json：{f}")
     for f in sorted(x for x in files if x.endswith(".md")):
         if f[:-3] + ".json" not in jsons: probs.append(f"{f} 沒有同名的案例 .json")
+    notes = []   # 姓名掃描：只提醒
     hero_lib = REPO / "hero_library"
     for f in sorted(jsons & set(index)):
         try: d = json.loads((CASES / f).read_text(encoding="utf-8"))
@@ -75,11 +85,13 @@ def check_cases():
             if isinstance(who, dict) and who.get("natural_person") and not NAME_OK.fullmatch(str(who.get("name", ""))):
                 probs.append(f"{f}：自然人姓名沒遮好：{who.get('name')!r}")
         left = sorted({n for s in strings(d) for n, _ in candidates(s)})
-        if left: probs.append(f"{f}：小卡內文疑似有沒遮的自然人姓名：{'、'.join(left)}")
+        if left: notes.append(f"{f}：小卡內文疑似有沒遮的自然人姓名：{'、'.join(left)}（請人工確認）")
     for f in sorted(x for x in files if x.endswith(".md")):
         left = sorted({n for n, _ in candidates((CASES / f).read_text(encoding="utf-8"))})
-        if left: probs.append(f"{f}：疑似有沒遮的自然人姓名：{'、'.join(left)}")
-    return gate(f"案例資料夾（{len(index)} 案）", not probs, probs or [f"index.json 與檔案一致；{len(files)} 個檔案格式、示意圖、姓名遮蔽都符合"])
+        if left: notes.append(f"{f}：疑似有沒遮的自然人姓名：{'、'.join(left)}（請人工確認）")
+    ok = gate(f"案例資料夾（{len(index)} 案）", not probs, probs or [f"index.json 與檔案一致；{len(files)} 個檔案格式、示意圖、當事人姓名遮蔽都符合"])
+    if notes: remind("姓名掃描（只提醒、不擋部署；由發包人在工具預覽判斷）", notes)
+    return ok
 
 
 def run(cmd, name, ok_text=None):
@@ -107,7 +119,7 @@ def main():
     index = json.loads((CASES / "index.json").read_text(encoding="utf-8"))["cases"]
     run(["node", str(REPO / "tools/card_check.js")] + [str(CASES / f) for f in index], f"check.js 每案 0 項必須修正（{len(index)} 案）")
     run(["node", str(TESTS / "m07_test.js"), str(REPO / "app_mobile/src/platform/js/check.js"), str(HERE / "ci/regression_cases/shilin_110_laosu_72.json")], "check.js 姓名遮蔽規則（李林○○、歐陽○○、王○○ 通過；王小明 擋）", "全部通過")
-    run([py, "-I", str(TESTS / "mask_rules_test.py")], "姓名掃描規則（「原告曾帶…」等不算人名；王小明、李林雪嬌等仍抓得到）", "全部通過")
+    run([py, "-I", str(TESTS / "mask_rules_test.py")], "姓名掃描規則（「原告曾帶…」「雇主韋彤企業有限公司」等不列；王小明、余美玲等仍列提醒）", "全部通過")
     sd = serve_dir(work, "serve_site", out)
     run([py, "-I", str(TESTS / "case_render_test.py"), str(sd)], "網站上每案 × 三個版型出圖檢查、離線快取、無外部連線", "全部通過")
     pv = re.search(r"VERSION\s*=\s*'([0-9.]+)'", (SRC / "platform/js/common.js").read_text(encoding="utf-8")).group(1)

@@ -2,7 +2,9 @@
 
 用法：python tools/mask_analysis_md.py <檔案.md ...> [--check]
   不加 --check：直接改寫檔案，印出每一處（前後文）與總數，供維護人員逐檔人工檢查。
-  加 --check：只檢查不改，還有沒遮的就回傳 1（build.py 打包時用同一套規則）。
+  加 --check：只檢查不改，還有沒遮的就回傳 1。
+  自動上架與 build.py 用同一套規則，但分析文字的結果只列「提醒」、不擋部署（發包人 2026-10-25 裁定：由發包人在工具預覽人工判斷）；
+  小卡當事人姓名（parties）另由格式檢查與 check.js M07 嚴格阻擋。
 找法：「稱謂（原告、被告、證人、配偶、父親、主管…）＋人名」，人名第一個字要是常見姓氏（避免把「原告主張」當成人名）；
 找到的名字在全文其他地方也一併換掉。沒有稱謂在前面的人名（例如「王小明表示…」）抓不到，一定要人工看過。
 """
@@ -31,6 +33,8 @@ FUNC_VERBS = set("帶遭被受提經於向在對與以將已未擔表說稱要�
 FUNC_WORDS = set("""家長 家屬 家人 家中 公司 法院 勞工 雇主 員工 同事 醫師 醫院 保險 單位 主管 學校 學生 老師 客戶 廠商 警方 警察 檢察 政府 機關
 市府 縣府 勞保 勞檢 工會 上級 下屬 對方 本人 自己 其他 他人 親友 友人 父母 子女 配偶 律師 社工 鄰居 房東 業主 承攬 派遣 該公 該院""".split())
 NAME_TAIL = set("主表到於未亦的之等說稱與及曾已則因在向對就並也均仍乃即係為請提經無有不受遭自將被由")
+# 名字起點往後 8 個字內有這些字樣，視為機構名稱（「雇主韋彤企業有限公司」），不列
+ORG_NEAR = re.compile(r"企業|公司|有限|股份|商行|工程|工作室|企業社|事務所")
 ORG_END = re.compile(r"(公司|股份|有限|企業|行號|工廠|機關|政府|局|署|處|部|會|院|所|校|學|銀行|協會|基金|醫院|診所|社|團|廠)$")
 NAME = r"(?:%s|[%s])[一-龥]{1,2}" % ("|".join(COMPOUND), SURNAMES)
 PAT = re.compile(r"(?P<role>%s)[ 　：:、，,（(]*(?P<name>%s)" % ("|".join(sorted(ROLES, key=len, reverse=True)), NAME))
@@ -56,6 +60,8 @@ def candidates(text):
         # 名字後面緊接公司／機關字樣（例如「被告王大公司」）就不是自然人
         tail = text[m.end("name"):m.end("name") + 4]
         if re.match(r"(股份|有限|公司|企業|工廠|醫院|機關)", tail):
+            continue
+        if ORG_NEAR.search(text[m.start("name"):m.start("name") + 8]):
             continue
         out.append((name, m.start("name")))
     return out

@@ -33,12 +33,13 @@ cp(KIT / 'casecard/design/standard.css', 'design/standard.css')
 # 案例來源資料夾：預設用本包的 cases/；要加案例就把檔案和 index.json 放進去再重新打包（也可用 --cases 指定別的資料夾）
 CASES = Path(sys.argv[sys.argv.index('--cases') + 1]) if '--cases' in sys.argv else KIT / 'cases'
 for p in sorted(CASES.glob('*.json')): cp(p, 'cases/' + p.name)
-# 案例分析 .md（平台頁讀 cases/<案例檔名>.md）：自然人姓名要先遮成「王○○」，用 tools/mask_analysis_md.py 同一套規則檢查，沒遮就停止
+# 案例分析 .md（平台頁讀 cases/<案例檔名>.md）：自然人姓名要先遮成「王○○」，用 tools/mask_analysis_md.py 同一套規則掃描；
+# 掃到的只印提醒、不停止（發包人 2026-10-25 裁定：分析文字由發包人人工判斷；當事人姓名仍在下面嚴格檢查）
 sys.path.insert(0, str(KIT / 'tools'))
 from mask_analysis_md import candidates as _md_names
 for p in sorted(CASES.glob('*.md')):
     _t = p.read_text(encoding='utf-8'); _left = _md_names(_t)
-    if _left: raise SystemExit(f'{p.name} 還有自然人姓名沒遮：' + '、'.join(sorted({n for n, _ in _left})) + '（先跑 tools/mask_analysis_md.py）')
+    if _left: print(f'提醒：{p.name} 疑似有自然人姓名沒遮：' + '、'.join(sorted({n for n, _ in _left})) + '（請人工確認）')
     cp(p, 'cases/' + p.name)
 # 放上網站的案例檔，自然人姓名一律先遮成「姓＋○○」（例如「羅○○」、複姓「歐陽○○」）再存；沒遮就停止打包
 import re as _re

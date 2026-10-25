@@ -43,7 +43,7 @@
 - `title`（2 行陣列）、`subtitle`（2 行陣列）、`tags`（2 個）
 - `info`：`cause`、`date_pending`（true／false）
 - `parties.plaintiff`／`parties.defendant`：`role`、`name`、`natural_person`
-  - **自然人 `name` 一律寫遮好的「姓＋○○」**（例：`王○○`、複姓 `歐陽○○`、冠夫姓 `李林○○`）；公司、機關寫全名。
+  - **自然人 `name` 一律寫遮好的「姓＋○○」**：開頭 1～2 個漢字、後面至少兩個○（例：`王○○`、複姓 `歐陽○○`、冠夫姓 `李林○○`）；公司、機關寫全名。**這一項嚴格阻擋**：沒遮好，Actions 失敗、不部署（check.js M07；當事人全名出現在小卡其他欄位也擋）。
 - `display`：`mask_natural_person_name`（有自然人就 true）；`keep_together`（選用）
 - `basics`：4 列 `[標籤, 內容]`，順序固定：職務、時間、月薪或計算基礎、傷病或事故
 - `relation`：`claim{label, note}`、`offset{label, amount, note}`、`court{role, name}`、`order{label, amount}`
@@ -59,14 +59,18 @@
 - `hero`：`file` 固定 `"overwork_night_desk.svg"`、**`hero_type` 必填**（overwork、fall、machine、traffic、chemical、electric、collapse、commute、construction、heat、disease、healthcare、stress、neutral 選一；對不上填 neutral）、`caption`「示意圖」、`origin`；**不填 `photo`**；`image` 只能填 `hero_library/` 裡已核准的圖
 - `source_refs`、`not_on_card`（依規則第五章）
 
-**Actions 會檢查**：格式、`hero_type`、自然人姓名（`parties` 與全文）、check.js「必須修正」0 項（提醒不擋）、三個版型都「檢查全部通過」（字太多爆框會擋）。
+**Actions 會檢查**：格式、`hero_type`、當事人（`parties`）自然人姓名遮蔽、check.js「必須修正」0 項（提醒不擋）、三個版型都「檢查全部通過」（字太多爆框會擋）。
+**只提醒、不擋**：小卡其他文字的姓名掃描（同第 5 節的掃描規則），結果在執行紀錄列【提醒】。
 
 ## 5. 案例分析 `.md`
 - UTF-8 純文字 Markdown，結構照規則第二章（標題、四行引言、1～16 節、圖卡門檻結論）。
 - **所有自然人姓名遮成「姓＋○○」**（原告、被告、證人、家屬、醫師、主管都算；公司、機關、法院不遮；判決原本已匿名的照原樣）。
 - 不得放判決全文原稿、找案例工具的交接檔。
 - 同一案多位同姓當事人時，用「原告一／被告一／死者」等稱呼區分。
-- Actions 會掃描「稱謂＋人名」型態的沒遮姓名；**沒有稱謂在前的人名掃不到**，工具預覽時要請發包人逐份看過。
+- **姓名掃描只提醒、不擋部署**（發包人 2026-10-25 裁定）：Actions 用 `tools/mask_analysis_md.py` 掃描「稱謂＋人名」型態的疑似沒遮姓名，結果在執行紀錄列【提醒】（執行頁也有黃色警告），部署照常進行。**是否真的漏遮，由發包人在工具預覽人工判斷**；工具預覽時請用同一支程式先掃一次，把提醒列給發包人看。
+  - 不列提醒的寫法：稱謂後接虛詞或動詞（「原告曾帶…」「被告曾遭…」「原告向家長…」）、已遮好的名字（含「李林○○」）、名字起點往後 8 個字內有「企業、公司、有限、股份、商行、工程、工作室、企業社、事務所」（視為機構名稱，例「雇主韋彤企業有限公司」）。
+  - **沒有稱謂在前的人名掃不到**，工具預覽時要請發包人逐份看過。
+  - 因為不擋部署，漏遮的姓名會上線；發現後依第 7 節撤回或修正後重推。
 
 ## 6. 推送後怎麼知道成功或失敗
 - 權杖需有 **Actions：唯讀**。推送後用這次提交的 sha 查：
