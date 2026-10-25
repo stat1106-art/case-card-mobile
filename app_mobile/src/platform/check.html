@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<meta name="color-scheme" content="light">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<link rel="icon" href="data:,">
+<title>上架前檢查｜企業職災平台</title>
+<link rel="stylesheet" href="css/platform.css">
+<link rel="stylesheet" href="css/check.css">
+</head>
+<body class="pf-page check-page">
+<nav class="pf-nav" aria-label="平台分頁"><ul>
+<li><a href="index.html">風險試算</a></li>
+<li><a href="cases.html">案例庫</a></li>
+<li><a href="case.html">案例分析</a></li>
+<li><a href="check.html" aria-current="page">上架前檢查</a></li>
+<li><a href="../index.html">產生圖卡</a></li>
+</ul></nav>
+<p class="pf-disclaimer">本平台為案例摘要與風險溝通參考，個案仍應以正式判決書全文及最終裁判結果為準；不構成法律意見，也不保證理賠。</p>
+<main class="pf-main check-main">
+<header class="check-header">
+<p class="check-eyebrow">小卡資料 · 上架準備</p>
+<h1>上架前檢查</h1>
+<p class="pf-lead">貼上 GPT 02 的完整回覆，一次核對金額、名字遮蔽與必填內容。</p>
+</header>
+<section class="pf-card check-input" aria-labelledby="pasteLabel">
+<label id="pasteLabel" for="reply">把 GPT 02 的回覆整段貼在這裡</label>
+<p id="pasteHelp" class="check-help">前後說明、資料區塊和「情境圖：」都可以一起貼上，不必自己挑資料。</p>
+<textarea id="reply" rows="11" aria-describedby="pasteHelp privacyNote" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="在這裡貼上完整回覆……"></textarea>
+<div class="check-input-actions">
+<button id="startCheck" type="button" class="pf-btn primary">開始檢查</button>
+<button id="clearInput" type="button" class="pf-btn">清空內容</button>
+<p id="privacyNote" class="check-privacy">只在此瀏覽器處理，不儲存、不傳送貼上的內容。</p>
+</div>
+</section>
+<p id="inputStatus" class="check-help" role="status" aria-live="polite"></p>
+<section id="checkResult" class="check-result" aria-labelledby="resultTitle" hidden>
+<div id="resultBanner" class="check-banner">
+<p class="check-eyebrow">檢查結果</p>
+<h2 id="resultTitle" tabindex="-1"></h2>
+<p id="resultMessage"></p>
+</div>
+<div id="findings" class="check-findings">
+<section class="pf-card check-required" aria-labelledby="requiredTitle">
+<h3 id="requiredTitle">必修 <span id="requiredCount" class="check-count"></span></h3>
+<p class="check-help">有必修項目時，請先修改再上架。</p>
+<ul id="requiredList" class="check-list"></ul>
+</section>
+<section class="pf-card check-warnings" aria-labelledby="warningsTitle">
+<h3 id="warningsTitle">提醒 <span id="warningsCount" class="check-count"></span></h3>
+<p class="check-help">提醒不擋上架，請逐項看一眼。</p>
+<ul id="warningsList" class="check-list"></ul>
+</section>
+</div>
+<div id="copyActions" class="pf-actions check-copy-actions">
+<button id="copyCorrections" type="button" class="pf-btn primary">複製給 GPT 的修改要求</button>
+<button id="copyCard" type="button" class="pf-btn primary" hidden>複製小卡資料</button>
+</div>
+<p id="copyStatus" class="check-copy-status" role="status" aria-live="polite"></p>
+<div id="manualCopy" class="pf-card" hidden>
+<label for="copyText">瀏覽器無法自動複製，請選取以下內容後複製。</label>
+<textarea id="copyText" rows="6" readonly aria-label="待複製的內容" spellcheck="false"></textarea>
+</div>
+</section>
+<noscript><p class="pf-error">請開啟瀏覽器的 JavaScript 功能，才能在本機檢查小卡資料。</p></noscript>
+</main>
+<p class="pf-version" id="pfVersion">平台版本 0.1.4</p>
+<script src="js/common.js"></script>
+<script src="js/check.js"></script>
+<script src="js/check-ui.js"></script>
+</body>
+</html>

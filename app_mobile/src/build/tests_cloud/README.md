@@ -7,3 +7,5 @@
 - `hero_test.py <serve> <輸出>`：每案情境圖在三個版型的位置（搭配 `testcases_v3` 打包）。
 
 需要 `pip install playwright==1.56.0 pillow`；沒有 WebKit，iPhone Safari 的結果要真機確認。
+- `platform_test.py <serve>`：平台四頁頁尾版本、無程式錯誤，App 快取名稱帶平台版本、出圖正常、無外部連線。
+- `hash_test.py <serve>`：App 的 `#case=` 預選只認網站案例。

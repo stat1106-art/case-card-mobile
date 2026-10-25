@@ -1,3 +1,16 @@
+# 同步紀錄 2026-10-25：平台與網站手動改動收回 main（打包編號 8a6aba4972，尚未部署）
+
+- 背景：平台 v0.1.2～v0.1.4 是直接改在 gh-pages 上，main 沒有；從 main 重新打包會蓋掉平台。
+- 收回 main：
+  - `app_mobile/src/platform/`：取自網站現況（v0.1.4），與 platform_v0.1.4.zip 17 檔逐檔相同。
+  - `app_src/js/app.js`：`#case=` 預選（只選清單裡讀取成功的網站案例，不拿網址片段組檔案路徑）。
+  - `app_src/sw.js`：快取名稱 `casecard-<打包編號>-platform-<平台版本>`（平台版本由 build.py 從 platform/js/common.js 讀出）；platform/ 與 cases/*.md 先問網路。
+  - `build.py`：platform/ 原樣放進網站、不進預先快取清單；**測試用檔案（fixtures、test_ 開頭、testcases、tests）或案例／平台資料裡有 `<script>` 就停止打包**（已測：測試案例資料夾、夾 <script> 的案例都會擋下，不留半成品）。
+- 從 main 重新打包，與網站現況逐檔比對：檔案清單相同（網站多 `.nojekyll`，部署時才加）；platform/ 等 72 個檔案逐位元組相同；`js/app.js`、`sw.js`、`version.json` 只差打包編號（83e866a029 → 8a6aba4972，因 app.js 內容收進原始碼）與網站手動改時多的結尾空行，換回編號、去掉空行後完全相同。
+- 測試（Chromium）：原本整套、v0.4.0 管理端驗收、平台四頁頁尾「平台版本 0.1.4」無錯誤、`#case=` 預選，全部通過。
+
+---
+
 # 驗收結果 v0.4.0（打包編號 83e866a029，同仁端／管理端分開）
 
 ## 這一版改了什麼

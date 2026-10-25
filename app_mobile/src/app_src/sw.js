@@ -1,9 +1,9 @@
 /* 離線快取。BUILD 由 build.py 每次打包時換成新的編號，換了編號就會更新快取。 */
 const BUILD = '__BUILD__';
-const CACHE = 'casecard-' + BUILD;
+const CACHE = 'casecard-' + BUILD + '-platform-__PLATFORM__';
 const PRECACHE = __PRECACHE__;
 // 這些每次都先問網路（有網路就拿最新，沒網路才用快取），新案例才看得到
-const FRESH = /\/(cases\/[^/]+\.json|version\.json)$/;
+const FRESH = /\/(cases\/[^/]+\.(json|md)|version\.json)$|\/platform\//;
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(PRECACHE.map(p => new Request(p, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });

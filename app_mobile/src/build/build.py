@@ -1,5 +1,5 @@
 """組出 dist/：python build/build.py  （不用 Node）"""
-import datetime as _dt, hashlib, json, shutil, sys, os
+import datetime as _dt, hashlib, json, re as _re, shutil, sys, os
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 ROOT = Path(__file__).resolve().parent.parent
@@ -18,6 +18,15 @@ def cp(a, b):
     b = out / b; b.parent.mkdir(parents=True, exist_ok=True); shutil.copyfile(a, b)
 for p in APP.rglob('*'):
     if p.is_file(): cp(p, p.relative_to(APP))
+# 企業職災平台（platform/）：原樣放進網站 platform/，不進離線預先快取（sw.js 的 FRESH 對它採網路優先）。
+# sw.js 的快取名稱＝casecard-<打包編號>-platform-<平台版本>，平台版本從 platform/js/common.js 讀出，平台改版也會換快取。
+PLATFORM = ROOT / 'platform'
+if not (PLATFORM / 'js/common.js').is_file(): raise SystemExit('缺少 platform/（企業職災平台）')
+for p in sorted(PLATFORM.rglob('*')):
+    if p.is_file(): cp(p, 'platform/' + p.relative_to(PLATFORM).as_posix())
+_pv = _re.search(r"VERSION\s*=\s*'([0-9][0-9.]*)'", (PLATFORM / 'js/common.js').read_text(encoding='utf-8'))
+if not _pv: raise SystemExit('platform/js/common.js 讀不到平台版本')
+PLATFORM_VERSION = _pv.group(1)
 for p in sorted((KIT / 'casecard/skins').glob('skin_*.json')): cp(p, 'skins/' + p.name)
 cp(KIT / 'casecard/design/standard.css', 'design/standard.css')
 # 案例來源資料夾：預設用本包的 cases/；要加案例就把檔案和 index.json 放進去再重新打包（也可用 --cases 指定別的資料夾）
@@ -132,10 +141,18 @@ files = sorted(p for p in out.rglob('*') if p.is_file() and p.name != 'sw.js')
 h = hashlib.sha256()
 for p in files: h.update(str(p.relative_to(out)).encode()); h.update(p.read_bytes())
 build = h.hexdigest()[:10]
-pre = ['./'] + [p.relative_to(out).as_posix() for p in files if not p.name.endswith(('.md', '.txt')) or p.parent.name == 'fonts']
-sw = (out / 'sw.js').read_text(encoding='utf-8').replace('__BUILD__', build).replace('__PRECACHE__', json.dumps(pre, ensure_ascii=False))
+pre = ['./'] + [p.relative_to(out).as_posix() for p in files if (not p.name.endswith(('.md', '.txt')) or p.parent.name == 'fonts') and not p.relative_to(out).as_posix().startswith('platform/')]
+sw = (out / 'sw.js').read_text(encoding='utf-8').replace('__BUILD__', build).replace('__PRECACHE__', json.dumps(pre, ensure_ascii=False)).replace('__PLATFORM__', PLATFORM_VERSION)
 (out / 'sw.js').write_text(sw, encoding='utf-8')
 a = (out / 'js/app.js').read_text(encoding='utf-8').replace('__BUILD__', build); (out / 'js/app.js').write_text(a, encoding='utf-8')
 (out / 'version.json').write_text(json.dumps({'version': '0.4.0', 'build': build}), encoding='utf-8')
+# 測試用的假案例（fixtures、test_ 開頭、testcases）與夾 <script> 的資料不得進網站
+for p in sorted(out.rglob('*')):
+    rel = p.relative_to(out).as_posix()
+    if not p.is_file(): continue
+    if _re.search(r'(^|/)(fixtures?|testcases?[^/]*|tests?)(/|$)|(^|/)test_[^/]*$', rel, _re.I):
+        raise SystemExit(f'測試用檔案不得放進網站：{rel}')
+    if rel.startswith(('cases/', 'platform/data/')) and p.suffix in ('.json', '.md') and '<script' in p.read_text(encoding='utf-8', errors='ignore').lower():
+        raise SystemExit(f'資料檔裡有 <script>，不得放進網站：{rel}')
 _done.append(True)
 print('build', build, len(pre), 'files')

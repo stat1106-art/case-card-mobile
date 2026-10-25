@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<meta name="color-scheme" content="light">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="data:,">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>風險試算｜企業職災平台</title>
+<link rel="stylesheet" href="css/risk.css">
+<link rel="stylesheet" href="css/platform.css">
+</head>
+<body>
+  <nav class="pf-nav" aria-label="平台分頁"><ul>
+<li><a href="index.html" aria-current="page">風險試算</a></li>
+<li><a href="cases.html">案例庫</a></li>
+<li><a href="case.html">案例分析</a></li>
+<li><a href="check.html">上架前檢查</a></li>
+<li><a href="../index.html">產生圖卡</a></li>
+</ul></nav>
+<p class="pf-disclaimer">本平台為案例摘要與風險溝通參考，個案仍應以正式判決書全文及最終裁判結果為準；不構成法律意見，也不保證理賠。</p>
+<div id="loadError" class="pf-error" hidden>風險資料讀不出來，請重新整理頁面再試一次。</div>
+  <div class="page">
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path d="M12 3.2 19 6.1v5.1c0 4.4-2.7 8.1-7 9.8-4.3-1.7-7-5.4-7-9.8V6.1L12 3.2Z"></path>
+              <path d="m8.8 12.1 2.1 2.1 4.5-5"></path>
+            </svg>
+          </div>
+          <div class="brand-copy">
+            <h1>企業職災風險評估工具</h1>
+          </div>
+        </div>
+        <div class="top-actions">
+          <span class="data-badge" id="dataBadge">113年職災率｜111–114年事故類型｜86筆判決金額</span>
+          <button class="button-ghost" id="printButton" type="button" aria-label="列印或儲存報告">
+            <span aria-hidden="true">⎙</span>
+            <span>列印報告</span>
+          </button>
+        </div>
+      </header>
+
+            <main class="workspace" id="calculator">
+        <aside class="input-panel" aria-labelledby="inputTitle">
+          <div class="step-kicker"><span>1</span> 輸入評估條件</div>
+          <h2 id="inputTitle">開始職災風險試算</h2>
+          <p>選擇企業所屬產業並輸入月薪，系統會以相同金額作為簡化試算基礎。</p>
+
+          <form id="riskForm" novalidate="">
+            <div class="field">
+              <label for="industryGroup">
+                產業大類
+              </label>
+              <div class="control-wrap">
+                <select id="industryGroup" name="industryGroup" aria-describedby="industryHelp"><option value="農、林、漁、牧業">農、林、漁、牧業</option><option value="礦業及土石採取業">礦業及土石採取業</option><option value="製造業">製造業</option><option value="電力及燃氣供應業">電力及燃氣供應業</option><option value="用水供應及污染整治業">用水供應及污染整治業</option><option value="營建工程業">營建工程業</option><option value="批發及零售業">批發及零售業</option><option value="運輸及倉儲業">運輸及倉儲業</option><option value="住宿及餐飲業">住宿及餐飲業</option><option value="出版影音及資通訊業">出版影音及資通訊業</option><option value="金融及保險業">金融及保險業</option><option value="不動產業">不動產業</option><option value="專業、科學及技術服務業">專業、科學及技術服務業</option><option value="支援服務業">支援服務業</option><option value="公共行政及國防；強制性社會安全">公共行政及國防；強制性社會安全</option><option value="教育業">教育業</option><option value="醫療保健及社會工作服務業">醫療保健及社會工作服務業</option><option value="藝術、娛樂及休閒服務業">藝術、娛樂及休閒服務業</option><option value="其他服務業">其他服務業</option></select>
+                <span class="control-icon" aria-hidden="true">⌄</span>
+              </div>
+              <div class="field-note" id="industryHelp">
+                職災千人率依官方19大行業呈現；事故類型、薪資與法院案例再依下方細分產業篩選。
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="industry">
+                細分產業
+                <small>薪資／案例資料</small>
+              </label>
+              <div class="control-wrap">
+                <select id="industry" name="industry" aria-describedby="detailIndustryHelp"><option value="批發及零售業">批發及零售業</option></select>
+                <span class="control-icon" aria-hidden="true">⌄</span>
+              </div>
+              <div class="field-note" id="detailIndustryHelp">
+                製造業可再細分；其他產業若無細項，會沿用產業大類名稱。
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="salary">
+                平均月薪
+                <small>新臺幣／元，可修改</small>
+              </label>
+              <div class="control-wrap has-prefix">
+                <span class="currency-prefix" aria-hidden="true">NT$</span>
+                <input id="salary" name="salary" type="number" inputmode="numeric" min="1" max="10000000" step="any" value="45000" autocomplete="off" aria-describedby="salaryHelp salaryError">
+              </div>
+              <div class="salary-reference-row">
+                <span id="salaryReference">113/01–115/05產業平均：NT$ 47,029</span>
+                <button class="mini-action" id="applySalaryReference" type="button">帶入參考值</button>
+              </div>
+              <div class="field-note" id="salaryHelp">
+                預設參考113/01–115/05每人每月經常性薪資平均。試算時暫以同一金額近似「平均工資」與「平均月投保薪資」，正式認定口徑可能不同。
+              </div>
+            </div>
+
+            <div class="input-error" id="salaryError" role="alert" aria-live="polite"></div>
+
+            <button class="primary-button" type="submit">
+              查詢風險結果
+              <span class="arrow" aria-hidden="true">→</span>
+            </button>
+          </form>
+
+          <div class="formula-mini" aria-label="主要試算公式">
+            <div class="formula-chip">
+              <span>死亡補償概算</span>
+              <strong>月薪 × 45個月</strong>
+            </div>
+            <div class="formula-chip">
+              <span>職災失能一次金</span>
+              <strong>月薪 × 60個月</strong>
+            </div>
+          </div>
+
+          <div class="panel-source">
+            45個月、60個月與40個月分屬不同法律制度或事故結果，並非可直接加總之單一理賠金額。
+          </div>
+        </aside>
+
+        <section class="results pulse" id="results" aria-live="polite">
+          <section class="print-filter-summary" aria-label="本次評估條件">
+            <div class="print-filter-title">本次評估條件</div>
+            <div class="print-filter-grid">
+              <div class="print-filter-item">
+                <span>產業大類</span>
+                <strong id="printMajorIndustry">批發及零售業</strong>
+              </div>
+              <div class="print-filter-item">
+                <span>細分產業</span>
+                <strong id="printDetailIndustry">批發及零售業</strong>
+              </div>
+              <div class="print-filter-item">
+                <span>平均月薪</span>
+                <strong id="printSalary">NT$ 47,029</strong>
+              </div>
+              <div class="print-filter-item">
+                <span>事故類型</span>
+                <strong id="printAccident">全部事故</strong>
+              </div>
+            </div>
+          </section>
+
+          <p class="print-data-version" id="printDataVersion"></p>
+          <section class="result-hero">
+            <div>
+              <div class="hero-kicker">評估結果</div>
+              <h2><span id="industryName">批發及零售業</span>職災風險概況</h2>
+              <p class="hero-desc" id="heroDescription">職災率採「批發及零售業」113年官方千人率；薪資、事故類型與判決案例則依「批發及零售業」篩選。結果供企業風險溝通與保障缺口初步檢視。</p>
+              <div class="hero-tags">
+                <span class="hero-tag" id="salaryTag">試算月薪 NT$ 47,029</span>
+                <span class="hero-tag">職場職災率（不含交通事故）</span>
+                <span class="hero-tag" id="accidentTag">事故類型：全部事故</span>
+                <span class="hero-tag">相對四分位分級</span>
+              </div>
+            </div>
+
+            <div class="risk-dial-wrap">
+              <div class="risk-dial" id="riskDial" role="img" aria-label="批發及零售業職場職災千人率1.927，相對分級中高風險" style="--dial-color: #ef8a2f; --dial-angle: 57.809999999999995deg;">
+                <div class="dial-center">
+                  <small>職災千人率</small>
+                  <div class="dial-value"><span id="rateValue">1.927</span><span>‰</span></div>
+                  <div class="dial-level" id="riskLevel" style="background: rgb(239, 138, 47);">中高風險</div>
+                </div>
+              </div>
+              <div class="dial-caption">本站相對產業大類之分級，非官方法定分類分級</div>
+            </div>
+          </section>
+
+          <section class="metric-grid" aria-label="主要風險金額">
+            <article class="metric-card death">
+              <div class="metric-top">
+                <div class="metric-label">
+                  <span class="metric-icon" aria-hidden="true">45</span>
+                  身故法定補償概算
+                </div>
+                <span class="month-badge">45個月</span>
+              </div>
+              <div class="metric-number">
+                <span class="currency">NT$</span><span id="deathAmount">2,116,305</span>
+              </div>
+              <div class="metric-formula" id="deathFormula">47,029 × 45個月</div>
+              <p class="metric-note">
+                依《勞動基準法》第59條：5個月平均工資之喪葬費＋40個月平均工資之死亡補償。
+              </p>
+            </article>
+
+            <article class="metric-card disability">
+              <div class="metric-top">
+                <div class="metric-label">
+                  <span class="metric-icon" aria-hidden="true">60</span>
+                  職災失能一次金概算
+                </div>
+                <span class="month-badge">最高60個月</span>
+              </div>
+              <div class="metric-number">
+                <span class="currency">NT$</span><span id="disabilityAmount">2,821,740</span>
+              </div>
+              <div class="metric-formula" id="disabilityFormula">47,029 × 60個月</div>
+              <p class="metric-note">
+                職災保險失能一次金第1等級為1,800日，依平均月投保薪資÷30計算。本頁以輸入月薪近似、換算60個月；未套用實際投保級距，不代表所有失能均可領取。
+              </p>
+            </article>
+
+            <article class="metric-card work-ability">
+              <div class="metric-top">
+                <div class="metric-label">
+                  <span class="metric-icon" aria-hidden="true">40</span>
+                  喪失原有工作能力
+                </div>
+                <span class="month-badge">40個月</span>
+              </div>
+              <div class="metric-number">
+                <span class="currency">NT$</span><span id="workAbilityAmount">1,881,160</span>
+              </div>
+              <div class="metric-formula">平均月薪 × 40個月</div>
+              <p class="metric-note">
+                醫療滿2年仍未痊癒，經指定醫院診斷喪失原有工作能力，且不符合失能補償標準時，雇主得一次給付40個月平均工資。
+              </p>
+            </article>
+
+            <article class="metric-card court">
+              <div class="metric-top">
+                <div class="metric-label">
+                  <span class="metric-icon" aria-hidden="true">§</span>
+                  法院案例判賠金額
+                </div>
+                <span class="month-badge" id="courtBadge">3筆收錄</span>
+              </div>
+              <div class="metric-number" id="courtAmount">NT$ 101,200－12,282,883</div>
+              <div class="metric-formula" id="courtFormula">3筆收錄案例｜中位數 NT$ 2,358,074</div>
+              <p class="metric-note">
+                判決金額受傷勢、過失比例、扶養、醫療、勞動能力減損及既領給付抵充等因素影響，不等同法定固定倍數。
+              </p>
+            </article>
+          </section>
+
+          <div class="content-grid">
+            <section class="section-card">
+              <div class="section-heading">
+                <div>
+                  <h3>產業職災率比較</h3>
+                  <p>單位：每1,000名被保險人之給付人次率</p>
+                </div>
+                <span class="source-pill" id="rateSourcePill">113年資料</span>
+              </div>
+
+              <div class="bar-row">
+                <div class="bar-label">
+                  <span id="workplaceRateLabel">批發及零售業｜職場事故（不含交通）</span>
+                  <strong id="workplaceRateText">1.927‰</strong>
+                </div>
+                <div class="bar-track">
+                  <div class="bar-fill tomato" id="workplaceBar" style="width: 16.0583%;"></div>
+                </div>
+              </div>
+
+              <div class="bar-row">
+                <div class="bar-label">
+                  <span>全產業｜職場事故（不含交通）</span>
+                  <strong id="overallRateText">2.375‰</strong>
+                </div>
+                <div class="bar-track">
+                  <div class="bar-fill neutral" id="overallBar" style="width: 19.7917%;"></div>
+                </div>
+              </div>
+
+              <div class="bar-row">
+                <div class="bar-label">
+                  <span id="includingTrafficLabel">批發及零售業｜含交通事故參考值</span>
+                  <strong id="includingTrafficText">4.631‰</strong>
+                </div>
+                <div class="bar-track">
+                  <div class="bar-fill" id="includingTrafficBar" style="width: 38.5917%;"></div>
+                </div>
+              </div>
+
+              <div class="comparison-box">
+                <span class="dot" id="comparisonDot" aria-hidden="true" style="background: rgb(239, 138, 47); box-shadow: rgba(239, 138, 47, 0.12) 0px 0px 0px 5px;"></span>
+                <div id="comparisonText">
+        <strong>批發及零售業</strong>職場職災千人率較全產業平均低約
+        <strong>18.9%</strong>；含交通事故數值僅作補充參考，不納入分級。
+      </div>
+              </div>
+            </section>
+
+            <section class="section-card accident-selector-card">
+              <div class="section-heading">
+                <div>
+                  <h3>事故類型</h3>
+                  <p>點選常見事故類型，法院案例與查詢關鍵字會同步更新</p>
+                </div>
+                <span class="source-pill" id="accidentSourcePill">111–114年資料</span>
+              </div>
+
+              <div class="accident-buttons" id="accidentButtons" role="group" aria-label="事故類型"><button type="button" class="accident-chip" data-accident="全部事故" aria-pressed="true"><span>全部事故</span><span class="chip-count">5,913</span></button><button type="button" class="accident-chip" data-accident="跌倒" aria-pressed="false"><span>跌倒</span><span class="chip-count">1,264</span></button><button type="button" class="accident-chip" data-accident="被切、割、擦傷" aria-pressed="false"><span>被切、割、擦傷</span><span class="chip-count">857</span></button><button type="button" class="accident-chip" data-accident="被撞" aria-pressed="false"><span>被撞</span><span class="chip-count">668</span></button><button type="button" class="accident-chip" data-accident="不當動作" aria-pressed="false"><span>不當動作</span><span class="chip-count">567</span></button><button type="button" class="accident-chip" data-accident="其他" aria-pressed="false"><span>其他</span><span class="chip-count">519</span></button><button type="button" class="accident-chip" data-accident="被夾、被捲" aria-pressed="false"><span>被夾、被捲</span><span class="chip-count">363</span></button><button type="button" class="accident-chip" data-accident="墜落、滾落" aria-pressed="false"><span>墜落、滾落</span><span class="chip-count">320</span></button></div>
+              <div class="accident-selector-note" id="accidentHelp">111–114年共5,913件；按件數由高至低顯示前7類，點選後同步篩選法院案例。</div>
+            </section>
+          </div>
+
+          
+          
+
+          <section class="cases-section">
+            <div class="cases-header">
+              <div>
+                <h3>法院相似判決案例</h3>
+                <p>案號、金額與摘要沿用原附件；判決是否確定、後續審級及抵充情形，請以裁判原文為準。</p>
+              </div>
+              <span class="case-count" id="caseCount">3筆案例</span>
+            </div>
+            <div class="case-list" id="caseList"><article class="case-card">
+          <div class="case-card-main">
+            <div class="case-title-row">
+              <span class="case-index">1</span>
+              <div>
+                <h4>交通事故公路｜右側手部第二掌骨骨折,接受復位及骨釘固定手術</h4>
+                <div class="case-meta">
+                  <span>臺灣新北地方法院</span>
+                  <span>114年度 勞簡字第88號</span>
+                  <span>第一審</span>
+                </div>
+              </div>
+            </div>
+            <p>原告受僱於被告經營之統一超商加盟門市,擔任大夜班職員。113年11月13日下班返家途中,騎乘機車遭自小客車撞擊,受有右側手部第二掌骨骨折,經手術治療。法院認定為通勤職災,且被告未依法投保勞保及提繳勞退,應負醫療費、原領工資及勞退提繳責任。本案未認定過失比例。</p>
+            <p class="case-offset-note">抵充摘要：判決未載明已抵充之勞保給付。 因被告未依法投保勞保,原告無法請領勞保醫療給付。 共抵充:0元 團險抵充:未載明</p>
+            <div class="case-tags"><span class="tag-accent">交通事故公路</span></div>
+          </div>
+          <div class="case-amount">
+            <span>本件判決／剩餘應給付</span>
+            <strong>NT$ 101,200</strong>
+            <div class="case-actions">
+              <button class="case-link copy-case" type="button" data-query="臺灣新北地方法院 114年度 勞簡字第88號">複製案號</button>
+              <a class="case-link" href="https://judgment.judicial.gov.tw/FJUD/Default.aspx" target="_blank" rel="noopener noreferrer">開啟查詢 ↗</a>
+            </div>
+          </div>
+        </article><article class="case-card">
+          <div class="case-card-main">
+            <div class="case-title-row">
+              <span class="case-index">2</span>
+              <div>
+                <h4>其他｜急性腦中風、左大腦中動脈急性腦梗塞、完全性失語症、喪失工作能力</h4>
+                <div class="case-meta">
+                  <span>臺灣士林地方法院</span>
+                  <span>110年度 勞訴字第72號</span>
+                  <span>第一審</span>
+                </div>
+              </div>
+            </div>
+            <p>原告受僱於被告公司擔任品牌副理,因工作內容涉及品牌行銷、活動規劃、口譯及管理,法院認定其入職後短期內承辦多項酒展、酒廠及晚宴活動,長期超時工作且工作壓力過重,於108年6月27日工作中急性腦中風。法院認定屬職業災害,被告違反保護勞工健康義務而有過失;但原告身體不適仍持續工作,與有過失10%。</p>
+            <p class="case-offset-note">抵充摘要：40個月工資補償:2,200,000元 法院認定此部分與本件職災損害賠償有關,依勞基法第60條得抵充。 預告期間工資:36,667元 法院認定與本件損害賠償無關,不列入抵充。 資遣費:79,216元 法院認定與本件損害賠償無關,不列入抵充。 失業給付補償:164,880元 法院認定與本件損害賠償無關,不列入抵充。 110年9月13日至111年1月20日醫療…</p>
+            <div class="case-tags"><span class="tag-accent">其他</span></div>
+          </div>
+          <div class="case-amount">
+            <span>本件判決／剩餘應給付</span>
+            <strong>NT$ 12,282,883</strong>
+            <div class="case-actions">
+              <button class="case-link copy-case" type="button" data-query="臺灣士林地方法院 110年度 勞訴字第72號">複製案號</button>
+              <a class="case-link" href="https://judgment.judicial.gov.tw/FJUD/Default.aspx" target="_blank" rel="noopener noreferrer">開啟查詢 ↗</a>
+            </div>
+          </div>
+        </article><article class="case-card">
+          <div class="case-card-main">
+            <div class="case-title-row">
+              <span class="case-index">3</span>
+              <div>
+                <h4>其他｜急性顱內出血 出血性腦中風 左側偏癱 癲癇 意識障礙 終身無工作能力</h4>
+                <div class="case-meta">
+                  <span>臺灣桃園地方法院</span>
+                  <span>100年度 重勞訴字第12號</span>
+                  <span>第一審</span>
+                </div>
+              </div>
+            </div>
+            <p>原告郭○○自83年起任職聲寶股份有限公司擔任業務工作,長期負責拜訪客戶、出貨及貨款回收等業務。95年12月12日上班期間因長期工作壓力及超時工作,突發出血性腦中風,經勞保局於100年間重新認定屬職業病。法院認定原告之腦中風與職務具有業務起因性及業務執行性,屬職業病及職業災害,原告得依勞基法請求退休金及職業災害補償。惟法院不採原告主張之侵權行為責任及看護費、精神慰撫金請求。</p>
+            <p class="case-offset-note">抵充摘要：一、勞保職災傷病給付 373,874元 267,052元 合計: 640,926元 二、國華人壽團體保險給付 210,430元 317,252元 合計: 527,682元 三、法院認定可抵充總額 項目 金額 勞保職災傷病給付 640,926元 國華人壽團保給付 527,682元 合計 1,168,608元 團險抵充: 527,682元</p>
+            <div class="case-tags"><span class="tag-accent">其他</span><span>本案團險可抵充</span><span>永久失能</span></div>
+          </div>
+          <div class="case-amount">
+            <span>本件判決／剩餘應給付</span>
+            <strong>NT$ 2,358,074</strong>
+            <div class="case-actions">
+              <button class="case-link copy-case" type="button" data-query="臺灣桃園地方法院 100年度 重勞訴字第12號">複製案號</button>
+              <a class="case-link" href="https://judgment.judicial.gov.tw/FJUD/Default.aspx" target="_blank" rel="noopener noreferrer">開啟查詢 ↗</a>
+            </div>
+          </div>
+        </article></div>
+            <div class="case-footer" id="caseFooter" hidden="">
+              <button class="show-more-button" id="toggleCases" type="button">顯示全部3筆案例</button>
+            </div>
+          </section>
+
+          <section class="search-guide">
+            <div class="search-box">
+              <h3>到司法院查判解與完整裁判</h3>
+              <p>先用「職業災害」查詢，再逐一加入事故或法條字詞；一次輸入太多條件可能找不到資料。下方字詞隨選擇更新，可複製後刪減使用。</p>
+              <div class="query-row"><div class="query-text" id="queryText"></div><button class="copy-button" id="copyQuery" type="button">複製字詞</button></div>
+              <div class="manager-links"><a class="judgment-link" href="https://legal.judicial.gov.tw/FINT/default.aspx" target="_blank" rel="noopener noreferrer">法令判解系統（你提供的入口） ↗</a><a class="judgment-link" href="https://judgment.judicial.gov.tw/FJUD/default.aspx" target="_blank" rel="noopener noreferrer">司法院裁判書系統 ↗</a></div>
+              <div class="manager-toolbar"><button type="button" class="copy-button" id="copyBasicQuery">複製：職業災害</button><button type="button" class="copy-button" id="copyOffsetQuery">複製：職業災害 團體保險 抵充</button></div>
+            </div>
+            <div class="search-steps"><h3>查詢方式</h3><ol>
+              <li>法令判解系統可查精選裁判、決議、法律問題與函釋；完整個案另至裁判書系統查詢。</li>
+              <li>已有案號時，複製法院、年度與字號直接查。若摘要未列完整資訊，以原文及後續審級核對。</li>
+            </ol></div>
+          </section>
+
+          <details class="source-details">
+            <summary>查看計算依據、資料來源與分級方法</summary>
+            <div class="sources-content">
+              <div class="source-item">
+                <strong>身故45個月／特殊40個月</strong>
+                <p>《勞動基準法》第59條：死亡為5個月喪葬費＋40個月死亡補償；喪失原有工作能力的40個月屬另一特殊機制。</p>
+                <a href="https://law.moj.gov.tw/LawClass/LawAll.aspx?PCode=N0030001" target="_blank" rel="noopener noreferrer">開啟《勞動基準法》法規資料庫 ↗</a>
+              </div>
+              <div class="source-item">
+                <strong>失能最高60個月概算</strong>
+                <p>職災保險失能一次金按診斷實際永久失能日當月起前6個月平均月投保薪資及等級日數計算；第1等級1,800日。本頁保留原工具「輸入月薪×60」的簡化情境，未判定請領資格、失能等級或實際投保級距；雇主失能補償、保險一次金及年金應分別認定。</p>
+                <a href="https://laws.mol.gov.tw/FLAW/FLAWDAT0202.aspx?id=FL098310" target="_blank" rel="noopener noreferrer">開啟勞動部法規資料庫 ↗</a>
+                <a href="https://www.bli.gov.tw/0106067.html" target="_blank" rel="noopener noreferrer">查看勞保局職災失能給付標準 ↗</a>
+              </div>
+              <div class="source-item">
+                <strong id="sourceRateTitle">113年行業別職災千人率</strong>
+                <p id="sourceRateNote">採勞動部職安署「113年勞動檢查統計年報」職災千人率表；風險顏色為本站四分位相對分級。</p>
+                <a href="https://www.osha.gov.tw/48110/48331/48333/48339/191645/post" target="_blank" rel="noopener noreferrer">開啟勞動部職安署統計頁面 ↗</a>
+              </div>
+              <div class="source-item">
+                <strong>平均月薪參考</strong>
+                <p id="sourceSalaryNote">依「111~115 各產業X每人每月經常性薪資」資料，計算113/01–115/05之月平均；可由使用者自行覆寫。</p>
+		<a href="https://earnings.dgbas.gov.tw/query_payroll.aspx" target="_blank" rel="noopener noreferrer">開啟薪情平台頁面 ↗</a>
+              </div>
+              <div class="source-item">
+                <strong>事故類型按鈕</strong>
+                <p id="sourceAccidentNote">依「111~114 各產業X事故類型」逐年件數加總，顯示各細分產業件數最高的事故類型。</p>
+              </div>
+              <div class="source-item">
+                <strong>法院案例資料</strong>
+                <p id="sourceCasesNote">內嵌86筆原附件判決摘要，保留原始案號、金額與抵充說明。本次未逐案比對裁判書及後續審級；原附件部分摘要本身有省略。可複製案號至司法院確認完整原文。</p>
+                <a href="https://judgment.judicial.gov.tw/FJUD/Default.aspx" target="_blank" rel="noopener noreferrer">開啟司法院裁判書查詢 ↗</a>
+              </div>
+            </div>
+          </details>
+
+          <div class="legal-note">
+            本工具為初步風險概算，不構成法律意見、保險承保或理賠承諾。實際雇主補償責任、職災保險給付、民事損害賠償與抵充範圍，仍應依個案事實、適用法令、醫療與失能認定、投保薪資及法院裁判為準。
+          </div>
+        </section>
+      </main>
+
+      <footer id="dataFooter">
+        資料基準：113年職災千人率、113/01–115/05產業經常性薪資、111–114年事故類型及法院判決整理資料。職災率屬給付年度統計；本頁為風險溝通概算。單機重建版：2026-10-21；資料沿用附件，非即時更新。
+      </footer>
+    </div>
+  </div>
+
+<p class="pf-version" id="pfVersion">平台版本 0.1.4</p>
+<script src="js/common.js"></script>
+<script src="js/risk.js"></script>
+</body>
+</html>
