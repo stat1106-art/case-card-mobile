@@ -106,6 +106,7 @@ def main():
     if not run([py, str(HERE / "build.py"), str(out)], "打包（含測試假案例、<script>、.md 遮蔽、圖片來源紀錄攔截）"): return finish()
     index = json.loads((CASES / "index.json").read_text(encoding="utf-8"))["cases"]
     run(["node", str(REPO / "tools/card_check.js")] + [str(CASES / f) for f in index], f"check.js 每案 0 項必須修正（{len(index)} 案）")
+    run(["node", str(TESTS / "m07_test.js"), str(REPO / "app_mobile/src/platform/js/check.js"), str(HERE / "ci/regression_cases/shilin_110_laosu_72.json")], "check.js 姓名遮蔽規則（李林○○、歐陽○○、王○○ 通過；王小明 擋）", "全部通過")
     sd = serve_dir(work, "serve_site", out)
     run([py, "-I", str(TESTS / "case_render_test.py"), str(sd)], "網站上每案 × 三個版型出圖檢查、離線快取、無外部連線", "全部通過")
     pv = re.search(r"VERSION\s*=\s*'([0-9.]+)'", (SRC / "platform/js/common.js").read_text(encoding="utf-8")).group(1)

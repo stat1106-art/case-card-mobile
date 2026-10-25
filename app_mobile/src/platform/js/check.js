@@ -246,10 +246,11 @@ var CardCheck = (function () {
       var role = own(LABELS, key) ? LABELS[key] : '當事人';
       var name = typeof party.name === 'string' ? party.name : '';
       var chars = Array.from(name);
-      var masked = chars.length >= 2 && /^\p{L}$/u.test(chars[0]) && chars.slice(1).every(function (c) { return c === '○'; });
+      // 已遮蔽：開頭 1～2 個漢字（姓；複姓或冠夫姓留兩字，例：歐陽○○、李林○○），後面至少兩個○
+      var masked = /^[^\P{Script=Han}〇]{1,2}○{2,}$/u.test(name);
       if (!masked) {
-        var example = chars.length && !/[\s○〇◯●*xX×]/u.test(chars[0]) ? chars[0] + '○'.repeat(Math.max(1, chars.length - 1)) : '王○○';
-        error('M07', role + '名字還沒遮好，請改成「' + example + '」這種第一個字加空心圓的格式。');
+        var example = chars.length && !/[\s○〇◯●*xX×]/u.test(chars[0]) ? chars[0] + '○'.repeat(Math.max(2, chars.length - 1)) : '王○○';
+        error('M07', role + '名字還沒遮好，請改成「' + example + '」這種姓加兩個以上空心圓的格式（複姓或冠夫姓可留兩字，例如「歐陽○○」「李林○○」）。');
         if (filled(name) && chars.length > 1 && !/[○〇◯●*]/u.test(name)) {
           leaves.forEach(function (leaf) {
             if (leaf.keys.join('.') === 'card.parties.' + key + '.name') return;
