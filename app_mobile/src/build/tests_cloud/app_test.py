@@ -3,6 +3,10 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 serve, out = Path(sys.argv[1]), Path(sys.argv[2])
 URL = "http://127.0.0.1:8822/repo/"
+# 打包編號與預先快取檔數從被測的網站讀（不寫死）
+BUILD = json.loads((serve / "repo/version.json").read_text(encoding="utf-8"))["build"]
+_sw = (serve / "repo/sw.js").read_text(encoding="utf-8")
+PRECACHE_N = len(json.loads(_sw.split("const PRECACHE = ", 1)[1].split(";\n", 1)[0]))
 srv = subprocess.Popen([sys.executable, "-m", "http.server", "8822", "--bind", "127.0.0.1", "-d", str(serve)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 time.sleep(1)
 R = {}; net = []
@@ -27,9 +31,9 @@ try:
         pg.evaluate("navigator.serviceWorker.ready"); pg.reload(); pg.wait_for_selector("input[name=c]")
         rec("離線快取接管頁面", pg.evaluate("!!navigator.serviceWorker.controller"))
         n = pg.evaluate("async()=>{const ks=await caches.keys();let n=0;for(const k of ks){n+=(await (await caches.open(k)).keys()).length}return [ks,n]}")
-        rec("快取清單全部裝好（75 個）", n[1] >= 75, n)
+        rec(f"快取清單全部裝好（{PRECACHE_N} 個）", n[1] >= PRECACHE_N, n)
         rec("照片在離線快取裡", pg.evaluate("async()=>{for(const k of await caches.keys()){for(const r of await (await caches.open(k)).keys()){if(/photo/i.test(r.url))return true}}return false}"))
-        rec("版本號", "8a6aba4972" in pg.text_content("#ver"), pg.text_content("#ver"))
+        rec("版本號", BUILD in pg.text_content("#ver"), pg.text_content("#ver"))
         for t, s in JOBS:
             res = gen(pg, t, s, f"{t}_{s}.png")
             rec(f"出圖 {t}/{s}", res.startswith("檢查全部通過"), res)

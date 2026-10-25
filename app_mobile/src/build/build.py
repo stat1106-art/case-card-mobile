@@ -4,6 +4,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 ROOT = Path(__file__).resolve().parent.parent
 KIT = ROOT / 'src2/case_card_app_kit'
+if not KIT.exists(): KIT = ROOT.parent.parent   # 沒有 src2 捷徑時（例如 GitHub Actions），套件就是程式庫根目錄
 APP = ROOT / 'app_src'
 FONTS = ROOT / 'build/fonts_out'
 args = [a for i, a in enumerate(sys.argv[1:], 1) if a != '--cases' and sys.argv[i - 1] != '--cases']

@@ -1,0 +1,74 @@
+# 自動上架：推送只動到 cases/ 時，跑打包與完整檢查，全部通過才部署到 gh-pages。
+# 任何一關沒過、或推送動到 cases/ 以外的檔案 → 這次執行標示失敗、不部署，網站維持原狀。
+# publish-test 分支是演練用：同樣的檢查，部署到 gh-pages-test（不是對外網站）。
+# 維護人員改程式時，提交訊息加 [skip ci] 就不會觸發（略過＝不部署，沒有繞過檢查的效果）。
+name: 自動上架（cases/）
+
+on:
+  push:
+    branches: [main, publish-test]
+
+concurrency:
+  group: publish-${{ github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: 取得程式庫
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 路徑檢查（只准動 cases/）
+        id: paths
+        run: python3 .github/scripts/path_guard.py "${{ github.event.before }}" "${{ github.sha }}"
+
+      - name: 安裝 Python
+        if: steps.paths.outputs.cases_changed == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 安裝檢查工具（Pillow、Playwright＋Chromium）
+        if: steps.paths.outputs.cases_changed == 'true'
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pillow==12.2.0 playwright==1.56.0
+          python -m playwright install --with-deps chromium
+
+      - name: 打包與完整檢查
+        if: steps.paths.outputs.cases_changed == 'true'
+        run: python app_mobile/src/build/ci_publish.py --out "$RUNNER_TEMP/dist" --work "$RUNNER_TEMP/ci"
+
+      - name: 部署
+        if: steps.paths.outputs.cases_changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_REF_NAME}" = "main" ]; then TARGET=gh-pages; else TARGET=gh-pages-test; fi
+          BUILD=$(python -c "import json;print(json.load(open('$RUNNER_TEMP/dist/version.json'))['build'])")
+          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          SITE="$RUNNER_TEMP/site"
+          if git ls-remote --exit-code --heads "$REMOTE" "$TARGET" >/dev/null; then
+            git clone --quiet --depth 1 --branch "$TARGET" "$REMOTE" "$SITE"
+          else
+            mkdir -p "$SITE" && git -C "$SITE" init --quiet -b "$TARGET" && git -C "$SITE" remote add origin "$REMOTE"
+          fi
+          cd "$SITE"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -rq --ignore-unmatch . >/dev/null
+          cp -r "$RUNNER_TEMP/dist/." .
+          touch .nojekyll
+          git add -A
+          if git diff --cached --quiet; then echo "網站內容沒有變化，不需要提交。"; exit 0; fi
+          git commit --quiet -m "自動上架：${GITHUB_SHA:0:7}（打包編號 ${BUILD}）"
+          git push --quiet origin "HEAD:${TARGET}"
+          echo "### 已部署到 ${TARGET}（打包編號 ${BUILD}）" >> "$GITHUB_STEP_SUMMARY"
