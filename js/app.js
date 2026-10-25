@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 const APP_VERSION = '0.4.0';
-const BUILD = '83e866a029';
+const BUILD = '64cb73e186';
 // 壞檔在清單上的標示（驗收第 10 條的用字）；要換字只改這裡
 const BROKEN_LABEL = '這個案例讀不出來';
 const DISCLAIMER = '案例內容由 AI 整理，正式使用前請自己對照判決核對。';
@@ -301,4 +301,3 @@ PASTED = readPasted();
 window.addEventListener('hashchange', () => load(true));
 CardRender.init(BASE).then(() => load(true)).catch(() => { $('msg').textContent = MSG.listFail; });
 })();
-
