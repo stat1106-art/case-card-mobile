@@ -11,7 +11,7 @@ srv = subprocess.Popen([sys.executable, "-m", "http.server", "8822", "--bind", "
 time.sleep(1)
 R = {}; net = []
 def rec(k, ok, d=""): R[k] = ok; print(("PASS " if ok else "FAIL ") + k, str(d)[:200])
-JOBS = [("classic", s) for s in ["original","style1","style1_print","style2","style3","style4","style5","style6","style7"]] + [("light","original"),("standard","original")]
+JOBS = [("classic", s) for s in ["original","style1","style1_print","style2","style3","style4","style5","style6","style7"]]  # 0.5.0：只留新第一版
 def gen(pg, t, s, name):
     pg.select_option("#tpl", t)
     if t == "classic": pg.select_option("#skin", s)
@@ -39,8 +39,8 @@ try:
             rec(f"出圖 {t}/{s}", res.startswith("檢查全部通過"), res)
         ctx.set_offline(True)
         pg.reload(); pg.wait_for_selector("input[name=c]")
-        res = gen(pg, "standard", "original", "offline_standard_original.png")
-        rec("斷網後出圖（原版）", res.startswith("檢查全部通過"), res)
+        res = gen(pg, "classic", "original", "offline_classic_original.png")
+        rec("斷網後出圖（新第一版 original）", res.startswith("檢查全部通過"), res)
         res = gen(pg, "classic", "style3", "offline_classic_style3.png")
         rec("斷網後出圖（新第一版 style3）", res.startswith("檢查全部通過"), res)
         pg.screenshot(path=str(out / "screen_offline.png"), full_page=True)
@@ -49,6 +49,5 @@ finally:
     srv.terminate()
 ext = sorted({u for u in net if not u.startswith(("http://127.0.0.1:8822/", "data:", "blob:"))})
 rec("沒有連到外部網址", not ext, ext or f"共 {len(net)} 個請求，全部是本機")
-rec("原版有讀照片", any("overwork_night_desk_photo.card.jpg" in u for u in net))
 (out / "network_log.txt").write_text("\n".join(net))
 print("全部通過" if all(R.values()) else f"{sum(not v for v in R.values())} 項沒過")

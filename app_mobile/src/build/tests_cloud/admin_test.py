@@ -49,7 +49,7 @@ try:
         ctx.on("request", lambda r: net.append(r.url))
         pg = ctx.new_page(); pg.goto(URL); pg.wait_for_selector("input[name=c]")
         pg.evaluate("navigator.serviceWorker.ready"); pg.reload(); pg.wait_for_selector("input[name=c]")
-        rec("版本 0.4.0", "版本 0.4.0" in pg.text_content("#ver"), pg.text_content("#ver"))
+        rec("版本 0.5.0", "版本 0.5.0" in pg.text_content("#ver"), pg.text_content("#ver"))
         # (a) 同仁畫面
         ok, hits = user_view_ok(pg); rec("(a) 同仁畫面看不到貼上框、沒有程式字眼", ok, hits)
         pg.screenshot(path=str(out / "a_user_view_iphone15.png"), full_page=True)
@@ -69,13 +69,13 @@ try:
         close_admin(pg)
         rec("清單標「（僅本機）」", sum(x.endswith("（僅本機）") for x in labels(pg)) == 3, labels(pg))
         ok, hits = user_view_ok(pg); rec("回到同仁畫面仍看不到貼上框", ok, hits)
-        # 僅本機案例出圖：11 張和標準答案比（右上那格排除）
+        # 僅本機案例出圖：新第一版 9 種風格和標準答案比（右上那格排除；0.5.0 圖加寬，排除範圍從 x=540 起）
         pick_local(pg)
-        jobs = [("classic", s) for s in ["original","style1","style1_print","style2","style3","style4","style5","style6","style7"]] + [("light","original"),("standard","original")]
+        jobs = [("classic", s) for s in ["original","style1","style1_print","style2","style3","style4","style5","style6","style7"]]
         for t, s in jobs:
             res = gen(pg, t, s, f"{t}_{s}.png")
             a = Image.open(ref / f"{t}_{s}.png").convert("RGB"); bb = Image.open(out / f"{t}_{s}.png").convert("RGB")
-            for im in (a, bb): ImageDraw.Draw(im).rectangle([577, 0, 1079, 289], fill=0)
+            for im in (a, bb): ImageDraw.Draw(im).rectangle([540, 0, 1079, 289], fill=0)
             n = sum(ImageChops.difference(a, bb).convert("L").histogram()[33:]) / 1080 / 1620 * 100
             rec(f"(b) 僅本機案例出圖 {t}/{s}", res.startswith("檢查全部通過") and n < PIXEL_LIMIT_PCT, f"{res[:16]}｜差>32 {n:.3f}%")
         pg.screenshot(path=str(out / "b_user_after_generate.png"), full_page=True)
@@ -99,7 +99,7 @@ try:
         rec("(d) 斷網清單照常（內建＋僅本機）", len(labels(pg)) == 3, labels(pg))
         pg.check("input[value='shilin_110_laosu_72.json']")
         res = gen(pg, "classic", "style3", "d_offline_classic_style3.png"); rec("(d) 斷網出圖（內建案例 新第一版 style3）", res.startswith("檢查全部通過"), res[:16])
-        pick_local(pg, 1); res = gen(pg, "standard", name="d_offline_local_standard.png"); rec("(d) 斷網出圖（僅本機案例 原版）", res.startswith("檢查全部通過"), res[:16])
+        pick_local(pg, 1); res = gen(pg, "classic", name="d_offline_local_classic.png"); rec("(d) 斷網出圖（僅本機案例 新第一版）", res.startswith("檢查全部通過"), res[:16])
         open_admin(pg); m = paste(pg, GPT_ONE); close_admin(pg); rec("(d) 斷網也能在管理頁加入", m.startswith("已加入：1 案"), m)
         ctx.set_offline(False)
         # 存不住

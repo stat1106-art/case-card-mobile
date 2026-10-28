@@ -1,12 +1,13 @@
 /* 職災小卡 手機版：畫面流程沿用 v0.1 電腦版，只把出圖改成在瀏覽器裡做。 */
 (function () {
 'use strict';
-const APP_VERSION = '0.4.0';
+const APP_VERSION = '0.5.0';
 const BUILD = '__BUILD__';
 // 壞檔在清單上的標示（驗收第 10 條的用字）；要換字只改這裡
 const BROKEN_LABEL = '這個案例讀不出來';
 const DISCLAIMER = '案例內容由 AI 整理，正式使用前請自己對照判決核對。';
-const TEMPLATES = [['classic', '新第一版'], ['light', '淺色資訊圖'], ['standard', '原版']];
+// 0.5.0（發包人 2026-10-28 裁定）：只留新第一版；淺色資訊圖、原版的程式保留在 engine.js，但不再提供選擇。
+const TEMPLATES = [['classic', '新第一版']];
 const SKIN_FILES = ['original', 'style1', 'style1_print', 'style2', 'style3', 'style4', 'style5', 'style6', 'style7'];
 const MSG = {
   start: '請先在上面選案例，再按「產生小卡」。',
@@ -43,7 +44,8 @@ const HERO_SLOT = '<div id="hero-slot" style="position: absolute; left: 0; top: 
 // 新第一版放示意圖時，右上那一格改成內縮的圓角小卡（寬 400×高 231，和原本 503×290 同比例）：
 // 右緣對齊下面各區塊（距右 56px）、下緣停在資訊列上方，圖不再被資訊列蓋住；其他區塊位置不變。
 const HERO_INSET_CLASSIC = { from: 'right: 0; top: 0; width: 503px; height: 290px; overflow: hidden; background: #DCE6F0',
-  to: 'right: 56px; top: 18px; width: 400px; height: 231px; overflow: hidden; background: #DCE6F0; border-radius: 14px' };
+  to: 'right: 56px; top: 18px; width: 468px; height: 231px; overflow: hidden; background: #DCE6F0; border-radius: 14px' };
+// 0.5.0（發包人 2026-10-25 同意）：右上示意圖加寬，左緣從 x=624 拉到 x=556；高度不變（不蓋資訊列）。標題碰到圖由 render.js 的 L11 擋下。
 const $ = id => document.getElementById(id);
 const BASE = new URL('./', location.href).href;   // 相對路徑：放在 GitHub Pages 子目錄也能用
 let SKINS = {}, CASES = [], current = null;       // current = {blob, url, name}

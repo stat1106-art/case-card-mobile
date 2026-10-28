@@ -1,4 +1,4 @@
-"""網站上每一個案例 × 三個版型都要「檢查全部通過」；離線快取裝得起來；沒有外部連線。
+"""網站上每一個案例的新第一版都要「檢查全部通過」（0.5.0 起 App 只提供新第一版）；離線快取裝得起來；沒有外部連線。
 用法：python case_render_test.py <serve 資料夾（內有 repo/）>  全部通過才回傳 0。"""
 import json, subprocess, sys, time
 from pathlib import Path
@@ -20,7 +20,7 @@ try:
         listed = pg.eval_on_selector_all("input[name=c]", "e=>e.map(x=>x.value)")
         rec(f"清單列出全部 {len(cases)} 案", sorted(listed) == sorted(cases), listed)
         for case in cases:
-            for t in ("classic", "light", "standard"):
+            for t in ("classic",):
                 pg.check(f"input[value='{case}']"); pg.select_option("#tpl", t)
                 pg.evaluate("window.__lastResult=null"); pg.click("#go")
                 pg.wait_for_function("window.__lastResult && !document.getElementById('go').disabled", timeout=180000)

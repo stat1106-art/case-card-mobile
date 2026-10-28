@@ -6,7 +6,7 @@
      小卡當事人（parties）自然人姓名遮蔽；小卡全文與 .md 全文的姓名掃描只列【提醒】、不擋部署（發包人 2026-10-25 裁定）
   2. 打包（build.py 本身也擋測試假案例、<script>、當事人姓名沒遮、照片來源紀錄）
   3. 每案 check.js（tools/card_check.js）0 項必須修正
-  4. 網站上每案 × 三個版型「檢查全部通過」、離線快取、無外部連線（tests_cloud/case_render_test.py）、平台四頁
+  4. 網站上每案新第一版「檢查全部通過」、離線快取、無外部連線（tests_cloud/case_render_test.py）、平台四頁
   5. App 回歸測試：用凍結的士林案（ci/regression_cases）另外打包，跑原本整套測試（不受日後撤案影響）
 """
 import argparse, json, os, re, shutil, subprocess, sys
@@ -121,7 +121,7 @@ def main():
     run(["node", str(TESTS / "m07_test.js"), str(REPO / "app_mobile/src/platform/js/check.js"), str(HERE / "ci/regression_cases/shilin_110_laosu_72.json")], "check.js 姓名遮蔽規則（李林○○、歐陽○○、王○○ 通過；王小明 擋）", "全部通過")
     run([py, "-I", str(TESTS / "mask_rules_test.py")], "姓名掃描規則（「原告曾帶…」「雇主韋彤企業有限公司」等不列；王小明、余美玲等仍列提醒）", "全部通過")
     sd = serve_dir(work, "serve_site", out)
-    run([py, "-I", str(TESTS / "case_render_test.py"), str(sd)], "網站上每案 × 三個版型出圖檢查、離線快取、無外部連線", "全部通過")
+    run([py, "-I", str(TESTS / "case_render_test.py"), str(sd)], "網站上每案新第一版出圖檢查、離線快取、無外部連線", "全部通過")
     pv = re.search(r"VERSION\s*=\s*'([0-9.]+)'", (SRC / "platform/js/common.js").read_text(encoding="utf-8")).group(1)
     run([py, "-I", str(TESTS / "platform_test.py"), str(sd), pv], f"平台四頁（平台版本 {pv}）", "全部通過")
     # App 回歸測試：凍結的士林案另外打包（不部署）
@@ -129,7 +129,7 @@ def main():
     if run([py, str(HERE / "build.py"), str(reg), "--cases", str(HERE / "ci/regression_cases")], "App 回歸測試用打包（凍結士林案，不部署）"):
         rd = serve_dir(work, "serve_reg", reg); shot = work / "reg_out"; shot.mkdir()
         ref = REPO / "reference/expected_png"; shilin = HERE / "ci/regression_cases/shilin_110_laosu_72.json"
-        run([py, "-I", str(TESTS / "app_test.py"), str(rd), str(shot)], "App 整套（11 張出圖、離線、外部連線）", "全部通過")
+        run([py, "-I", str(TESTS / "app_test.py"), str(rd), str(shot)], "App 整套（9 種風格出圖、離線、外部連線）", "全部通過")
         run([py, "-I", str(TESTS / "overlap_check.py"), str(shot), str(ref)], "右上圖不蓋住資訊列", "全部通過")
         adm = work / "admin_out"; adm.mkdir()
         run([py, "-I", str(TESTS / "admin_test.py"), str(rd), str(adm), str(shilin), str(ref)], "同仁端／管理端驗收", "全部通過")

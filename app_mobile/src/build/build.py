@@ -154,7 +154,7 @@ pre = ['./'] + [p.relative_to(out).as_posix() for p in files if (not p.name.ends
 sw = (out / 'sw.js').read_text(encoding='utf-8').replace('__BUILD__', build).replace('__PRECACHE__', json.dumps(pre, ensure_ascii=False)).replace('__PLATFORM__', PLATFORM_VERSION)
 (out / 'sw.js').write_text(sw, encoding='utf-8')
 a = (out / 'js/app.js').read_text(encoding='utf-8').replace('__BUILD__', build); (out / 'js/app.js').write_text(a, encoding='utf-8')
-(out / 'version.json').write_text(json.dumps({'version': '0.4.0', 'build': build}), encoding='utf-8')
+(out / 'version.json').write_text(json.dumps({'version': '0.5.0', 'build': build}), encoding='utf-8')
 # 測試用的假案例（fixtures、test_ 開頭、testcases）與夾 <script> 的資料不得進網站
 for p in sorted(out.rglob('*')):
     rel = p.relative_to(out).as_posix()
