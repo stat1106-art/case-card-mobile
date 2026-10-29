@@ -38,3 +38,6 @@ button:disabled{opacity:.5}
 .caserow button{min-height:44px;padding:6px 12px;font-size:15px;flex:none}
 .adminlink{min-height:0;border:0;background:none;padding:0 0 0 14px;font-size:13px;color:#999;text-decoration:underline}
 #adminview h2{font-size:17px}
+
+/* 0.5.0：回平台案例清單 */
+.back{margin:0 0 6px}.back a{display:inline-block;padding:10px 0;font-size:16px;color:inherit}

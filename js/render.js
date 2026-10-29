@@ -155,6 +155,23 @@ async function renderCard(opts) {
   const measure = win.eval('(' + EN.JS_MEASURE + ')');
   const m = measure({ minFont: EN.MIN_FONT_PX, immutable: prep.card.immutable_checks || [] });
   checks.push(...EN.layoutChecks(m, prep.card, prep.deco));
+  {   // 0.5.0：L11 標題區的字不可被資訊列蓋住、也不可伸進右上示意圖（圖上的「示意圖」「草稿」標籤整個在圖內，不算）
+    const hits = [], head = doc.getElementById('s-head'), info = doc.getElementById('s-info');
+    const size = assets.heroInset && /width: \d+px; height: \d+px/.exec(assets.heroInset.to);
+    const box = size && doc.querySelector(`[style*="${size[0]}"]`), hr = box && box.getBoundingClientRect();
+    if (head && info) {
+      const limit = info.getBoundingClientRect().top, walker = doc.createTreeWalker(head, NodeFilter.SHOW_TEXT); let n;
+      while ((n = walker.nextNode())) {
+        if (!n.textContent.trim() || (box && box.contains(n))) continue;
+        const range = doc.createRange(); range.selectNodeContents(n);
+        for (const r of range.getClientRects()) {
+          const intoHero = hr && r.right > hr.left + 0.5 && r.left < hr.right - 0.5 && r.bottom > hr.top + 0.5 && r.top < hr.bottom - 0.5;
+          if (r.bottom > limit + 0.5 || intoHero) { hits.push(n.textContent.trim().slice(0, 16)); break; }
+        }
+      }
+      checks.push(['L11 標題區文字不被資訊列蓋住、不伸進右上示意圖', !hits.length, hits.length ? [...new Set(hits)] : '標題、副標題都在範圍內']);
+    }
+  }
   const diag = m.clipped.length ? clipDiag(doc) : [];
   checks.push(['F01 用到的字型都是隨包字型且已載入', allLoaded, needFaces.map(f => f.family + ' ' + f.weight + '：' + f.status)]);
   checks.push(['F02 字型檔 hash 已記錄', !!FONTS.sha256, FONTS.sha256 || '無']);
