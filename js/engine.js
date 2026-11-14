@@ -87,12 +87,15 @@ function buildClassic(c, draft, ref, A) {
   const info = c.info, rel = c.relation, r = c.result;
   const pl = c.parties.plaintiff, df = c.parties.defendant;
   const pl_name = (pl.natural_person && d.mask_natural_person_name) ? maskName(pl.name) : pl.name;
-  // 0.5.1：被告名稱太長時自動分行、縮字（原本 7 字以上就會超出框；例：17 字的「…股份有限公司」）
-  const df_name = df.name, dfa = Array.from(df_name);
+  // 0.5.1：當事人名稱太長時自動分行、縮字（原本 7 字以上就會超出框；例：17 字的「…股份有限公司」）。原告、被告都適用（雇主告勞工時公司在原告側）。
   const chunk = (arr, n) => { const out = []; for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n).join('')); return out; };
-  const df_long = dfa.length > 14;
-  const df_lines = dfa.length <= 6 ? [df_name] : chunk(dfa, Math.ceil(dfa.length / (df_long ? 3 : 2)));
-  const df_fs = df_long ? 18 : 20, df_lh = df_long ? 24 : 28, df_top = df_long ? 119 : 143;
+  const wrapName = (name) => {
+    const a = Array.from(name), long = a.length > 14;
+    return { lines: a.length <= 6 ? [name] : chunk(a, Math.ceil(a.length / (long ? 3 : 2))),
+             fs: long ? 18 : 20, lh: long ? 24 : 28, top: a.length <= 6 ? 158 : (long ? 119 : 143) };
+  };
+  const plw = wrapName(pl_name), dfw = wrapName(df.name);
+  const df_top = dfw.top === 158 ? 143 : dfw.top;
   const fl = r.flow;
   const font_url = ref('NotoSansTC-VF.ttf');
   const hero_svg = A.heroSvg || '';
@@ -123,9 +126,9 @@ function buildClassic(c, draft, ref, A) {
       <div style="position: absolute; left: 334px; top: 8px; width: 300px; text-align: center; font-size: 20px; line-height: 28px"><span style="font-size: 18px; color: ${K.muted}">${E(rel.court.role)}　</span><b>${E(rel.court.name)}</b></div>
       ${node(456, 42, K.dark, 'scale')}
       ${node(178, 158, K.plaintiff, 'person')}
-      <div style="position: absolute; left: 24px; top: 158px; width: 140px; text-align: right"><div style="font-size: 18px; line-height: 26px; color: ${K.muted}">${E(pl.role)}</div><div style="font-size: 20px; line-height: 28px; font-weight: 700">${E(pl_name)}</div></div>
+      <div style="position: absolute; left: 24px; top: ${plw.top}px; width: 140px; text-align: right"><div style="font-size: 18px; line-height: 26px; color: ${K.muted}">${E(pl.role)}</div><div style="font-size: ${plw.fs}px; line-height: ${plw.lh}px; font-weight: 700">${plw.lines.map(x => E(x)).join('<br>')}</div></div>
       ${node(734, 158, K.defendant, 'building')}
-      <div style="position: absolute; left: 802px; top: ${df_top}px; width: 150px"><div style="font-size: 18px; line-height: 26px; color: ${K.muted}">${E(df.role)}</div><div style="font-size: ${df_fs}px; line-height: ${df_lh}px; font-weight: 700">${df_lines.map(x => E(x)).join('<br>')}</div></div>
+      <div style="position: absolute; left: 802px; top: ${df_top}px; width: 150px"><div style="font-size: 18px; line-height: 26px; color: ${K.muted}">${E(df.role)}</div><div style="font-size: ${dfw.fs}px; line-height: ${dfw.lh}px; font-weight: 700">${dfw.lines.map(x => E(x)).join('<br>')}</div></div>
       ${arrow(234.6, 172.6, 237, K.plaintiff, -22.65)}
       <div style="position: absolute; left: 60px; top: 66px; width: 250px; text-align: right"><div style="font-size: 18px; line-height: 26px; font-weight: 700; color: ${K.plaintiff}">${E(rel.claim.label)}</div><div style="font-size: 18px; line-height: 26px; color: ${K.ink2}">${E('（' + rel.claim.note + '）')}</div></div>
       ${arrow(514.5, 81.2, 237, K.dark, 22.65)}
