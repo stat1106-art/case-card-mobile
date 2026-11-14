@@ -41,3 +41,38 @@ button:disabled{opacity:.5}
 
 /* 0.5.0：回平台案例清單 */
 .back{margin:0 0 6px}.back a{display:inline-block;padding:10px 0;font-size:16px;color:inherit}
+
+/* 0.5.2：黑金主題，依發包人 2026-11-14 提供的簡報（團險 2.0 台北 101）：底 #121114、象牙字 #FCF4E4、金 #E7BF79、淡金 #DEC8A0、古銅線 #6B5535；標題用明體 */
+:root{--bg:#121114;--panel:#19171a;--panel2:#211e1f;--line:rgba(231,191,121,.22);--br:#6B5535;--gold:#E7BF79;--ivory:#FCF4E4;--tan:#DEC8A0;--muted:#a8987c;
+  --serif:"Noto Serif TC","Noto Serif CJK TC","Source Han Serif TC","Songti TC","PMingLiU","MingLiU",serif}
+html{background:var(--bg)}
+body{background:var(--bg);color:var(--ivory)}
+.hero{position:relative;min-height:240px;background:var(--bg) url(img/hero_app.jpg) right center/cover no-repeat;border-bottom:1px solid var(--br)}
+.hero::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(18,17,20,.97) 0%,rgba(18,17,20,.9) 38%,rgba(18,17,20,.35) 70%,rgba(18,17,20,.08) 100%)}
+.hero-in{position:relative;max-width:640px;margin:0 auto;padding:calc(10px + env(safe-area-inset-top)) 16px 28px}
+.hero .back{margin:0 0 16px}.hero .back a{color:var(--tan);text-decoration:none;font-size:15px}
+.hero .back a:hover{color:var(--gold)}
+.kicker{display:inline-block;margin:0 0 12px;padding-bottom:7px;border-bottom:1px solid var(--gold);color:var(--gold);font-size:13px;letter-spacing:.14em;font-weight:700}
+.hero h1{margin:0 0 10px;font-family:var(--serif);font-size:36px;letter-spacing:.1em;color:var(--ivory);font-weight:700}
+.hero .lead{margin:0;color:var(--tan);font-size:16px;line-height:1.75}
+#app{padding-top:16px}
+h2{font-family:var(--serif);color:var(--gold);letter-spacing:.04em}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.case{border-bottom-color:rgba(107,85,53,.6)}
+.case input,.check input{accent-color:var(--gold)}
+select{background:var(--panel2);color:var(--ivory);border-color:var(--br)}
+select:disabled{background:#2a2622;color:#80776a}
+button{background:transparent;color:var(--gold);border-color:var(--br)}
+button.main{background:var(--gold);border-color:var(--gold);color:#1a1408;letter-spacing:.08em}
+button:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.note{color:var(--muted)}
+.warn{background:#2a2215;border-color:var(--br);color:#f3e2b8}
+.okmsg{background:#18241c;border-color:#3f6a4d;color:#cdebd6}
+.bad{color:#ff9c90}
+#pic{border-color:var(--line)}
+.ver,.adminlink{color:#7d7464}
+#paste{background:var(--panel2);color:var(--ivory);border-color:var(--br)}
+.pastelabel{color:var(--tan)}
+.caserow,.paste{border-bottom-color:rgba(107,85,53,.6)}
+@media (min-width:700px){.hero{min-height:300px}.hero-in{padding-top:30px;padding-bottom:44px}.hero h1{font-size:44px}}
+@media (max-width:420px){.hero::before{background:linear-gradient(90deg,rgba(18,17,20,.95) 0%,rgba(18,17,20,.82) 55%,rgba(18,17,20,.48) 100%)}}
