@@ -1,7 +1,7 @@
 /* 職災小卡 手機版：畫面流程沿用 v0.1 電腦版，只把出圖改成在瀏覽器裡做。 */
 (function () {
 'use strict';
-const APP_VERSION = '0.5.1';
+const APP_VERSION = '0.5.2';
 const BUILD = '__BUILD__';
 // 壞檔在清單上的標示（驗收第 10 條的用字）；要換字只改這裡
 const BROKEN_LABEL = '這個案例讀不出來';
