@@ -2,6 +2,9 @@
   "cases": [
     "cydv_115_laojian_4.json",
     "shilin_110_laosu_72.json",
+    "tcdv_113_laosu_265.json",
+    "tpdv_115_laoxiao_22.json",
+    "tphv_114_laoshangyi_101.json",
     "tydv_115_laosu_114.json"
   ]
 }

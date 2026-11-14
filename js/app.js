@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 const APP_VERSION = '0.5.1';
-const BUILD = '91d9952563';
+const BUILD = 'd6fa9aefd2';
 // 壞檔在清單上的標示（驗收第 10 條的用字）；要換字只改這裡
 const BROKEN_LABEL = '這個案例讀不出來';
 const DISCLAIMER = '案例內容由 AI 整理，正式使用前請自己對照判決核對。';
