@@ -1,0 +1,273 @@
+{
+ "format": "case-card-app-case",
+ "schema_version": 1,
+ "title": "四位家屬對三位被告連帶（版型壓力測試）",
+ "source": {
+  "court": "臺灣臺中地方法院",
+  "case_number": "999 年度重勞訴字第 999 號",
+  "decision_date": "2026-09-24",
+  "jid": "TCDV,999,重勞訴,999,20260924,1",
+  "url": "https://judgment.judicial.gov.tw/FJUD/data.aspx?ty=JD&id=TCDV%2C999"
+ },
+ "card": {
+  "display": {
+   "mask_natural_person_name": true
+  },
+  "tags": [
+   "民事勞動事件",
+   "職災侵權賠償"
+  ],
+  "title": [
+   "抽成司機也是勞工",
+   "車上卸貨未設防墜須連帶賠"
+  ],
+  "subtitle": [
+   "曳引車司機卸貨遭紙捲撞擊墜落",
+   "法院認雇主與堆高機操作人連帶賠償"
+  ],
+  "info": {
+   "cause": "損害賠償",
+   "date_pending": false
+  },
+  "basics": [
+   [
+    "職務",
+    "曳引車司機（按件抽成）"
+   ],
+   [
+    "時間",
+    "97 年起任職，110/4/16 受傷"
+   ],
+   [
+    "月薪",
+    "抽運費 23%，日薪以 3,003 元計"
+   ],
+   [
+    "疾病",
+    "腦外傷，失能第 1 級"
+   ]
+  ],
+  "relation": {
+   "claim": {
+    "label": "請求侵權損害賠償",
+    "note": "民法第 184、185、195 條"
+   },
+   "offset": {
+    "label": "無抵充",
+    "amount": "",
+    "note": "判決未處理抵充"
+   },
+   "court": {
+    "role": "法院",
+    "name": "臺灣臺中地方法院"
+   },
+   "order": {
+    "label": "判命被告連帶給付",
+    "amount": "合計 4,900,000 元"
+   }
+  },
+  "facts": [
+   {
+    "text": "97 年起擔任曳引車司機，報酬抽運費 23%",
+    "icon": "newhire"
+   },
+   {
+    "text": "派車、派貨都由雇主指示，車輛由雇主提供",
+    "icon": "check"
+   },
+   {
+    "text": "站在約 297 公分高的紙捲上協助卸貨，未戴安全帽",
+    "icon": "event"
+   },
+   {
+    "text": "堆高機操作不慎，紙捲撞擊致墜落",
+    "icon": "event"
+   },
+   {
+    "text": "腦外傷重傷，鑑定失能第 1 級",
+    "icon": "course"
+   }
+  ],
+  "facts_anchor": "110 年 4 月 16 日事故前後",
+  "timeline": {
+   "start": {
+    "date": "尚待確認",
+    "label": "到職",
+    "text": "擔任歐豐實業社曳引車司機，按件抽成"
+   },
+   "onset": {
+    "date": "2021/04/16",
+    "label": "事故",
+    "text": "載貨臺卸貨時遭紙捲撞擊墜落，重傷失能"
+   }
+  },
+  "result": {
+   "total": "4,900,000 元",
+   "total_label": "被告連帶應給付合計",
+   "awards": [
+    {
+     "who": "原告一（配偶）",
+     "calc": "扶養費＋慰撫金，自負 30%",
+     "amount": "2,100,000 元"
+    },
+    {
+     "who": "原告二（長子）",
+     "calc": "慰撫金 1,000,000 元 × 70%",
+     "amount": "700,000 元"
+    },
+    {
+     "who": "原告三（次子）",
+     "calc": "慰撫金 1,000,000 元 × 70%",
+     "amount": "700,000 元"
+    },
+    {
+     "who": "原告四（母親）",
+     "calc": "扶養費＋慰撫金 × 70%",
+     "amount": "1,400,000 元"
+    }
+   ],
+   "notes": "均自 111 年 9 月 3 日起年息 5%；勞動能力減損與不能工作損失重複不准；訴費被告連帶負擔 46%",
+   "pending": "本件為第一審判決，是否上訴、是否確定，目前尚待確認",
+   "lines": [
+    "准許及駁回如上",
+    "訴訟費用依主文"
+   ]
+  },
+  "sum_checks": [
+   {
+    "parts": [
+     "2,100,000",
+     "700,000",
+     "700,000",
+     "1,400,000"
+    ],
+    "total": "4,900,000"
+   }
+  ],
+  "immutable_checks": [
+   "4,900,000 元",
+   "2,100,000 元"
+  ],
+  "holdings": [
+   {
+    "head": "抽成司機仍是勞工",
+    "body": "派車派貨受指示、用公司車，具從屬性",
+    "issue": "抽成司機仍是勞工？"
+   },
+   {
+    "head": "掛名負責人也是雇主",
+    "body": "有參與派工，與實際負責人連帶負責",
+    "issue": "掛名負責人也是雇主？"
+   },
+   {
+    "head": "車上卸貨也要防墜",
+    "body": "難設工作臺，仍應掛安全網或安全帶",
+    "issue": "車上卸貨也要防墜？"
+   },
+   {
+    "head": "未戴安全帽自負四成",
+    "body": "配偶慰撫金一併扣減 40%",
+    "issue": "未戴安全帽自負四成？"
+   }
+  ],
+  "advisory": [
+   {
+    "head": "盤點抽成司機身分",
+    "body": "依實際派工方式檢視勞工身分與投保"
+   },
+   {
+    "head": "車上高處防墜",
+    "body": "設安全網、吊掛點並要求配戴"
+   },
+   {
+    "head": "督導配戴護具",
+    "body": "告知單之外要有現場查核紀錄"
+   },
+   {
+    "head": "評估長照賠償風險",
+    "body": "失能安養費依餘命計算，金額最高"
+   }
+  ],
+  "advisory_icons": [
+   "search",
+   "group",
+   "bell",
+   "ledger"
+  ],
+  "source_card": {
+   "name": "司法院裁判書查詢系統",
+   "url": "judgment.judicial.gov.tw",
+   "how": "以法院及案號檢索"
+  },
+  "disclaimer": "本圖卡為案例摘要，個案仍應以正式判決書全文及最終裁判結果為準；本整理不構成任何法律意見，亦不保證內容正確性。",
+  "hero": {
+   "file": "overwork_night_desk.svg",
+   "hero_type": "construction",
+   "caption": "示意圖",
+   "origin": "浪板（鐵皮）工程施工、工作手套之示意，非事發現場、未繪人物"
+  },
+  "source_refs": {
+   "title": "測試資料",
+   "subtitle": "測試資料",
+   "tags": "測試資料",
+   "info": "測試資料",
+   "parties": "測試資料",
+   "basics": "測試資料",
+   "relation": "測試資料",
+   "facts": "測試資料",
+   "facts_anchor": "測試資料",
+   "timeline": "測試資料",
+   "result": "測試資料",
+   "sum_checks": "測試資料",
+   "holdings": "測試資料",
+   "advisory": "測試資料",
+   "hero": "測試資料",
+   "not_on_card": "測試資料"
+  },
+  "not_on_card": [
+   "人物臉孔、受傷畫面"
+  ],
+  "parties": {
+   "plaintiffs": [
+    {
+     "role": "原告一／配偶",
+     "name": "林○○",
+     "natural_person": true
+    },
+    {
+     "role": "原告二／長子",
+     "name": "王○○",
+     "natural_person": true
+    },
+    {
+     "role": "原告三／次子",
+     "name": "王○○",
+     "natural_person": true
+    },
+    {
+     "role": "原告四／母親",
+     "name": "歐陽○○",
+     "natural_person": true
+    }
+   ],
+   "defendants": [
+    {
+     "role": "被告一／雇主",
+     "name": "台灣捷爾東旅館管理顧問股份有限公司",
+     "natural_person": false
+    },
+    {
+     "role": "被告二／負責人",
+     "name": "陳○○",
+     "natural_person": true
+    },
+    {
+     "role": "被告三／原事業單位",
+     "name": "大同國際餐旅股份有限公司",
+     "natural_person": false
+    }
+   ],
+   "joint": true
+  }
+ }
+}

@@ -1,0 +1,232 @@
+{
+ "format": "case-card-app-case",
+ "schema_version": 1,
+ "title": "職災須證明事故與因果，雇主已盡人因預防免責",
+ "source": {
+  "court": "臺灣高等法院",
+  "case_number": "115 年度勞上字第 31 號",
+  "decision_date": "2026-10-13",
+  "jid": "TPHV,115,勞上,31,20261013,1",
+  "url": "https://judgment.judicial.gov.tw/FJUD/data.aspx?ty=JD&id=TPHV%2C115%2C%E5%8B%9E%E4%B8%8A%2C31%2C20261013%2C1"
+ },
+ "card": {
+  "display": {
+   "mask_natural_person_name": true
+  },
+  "tags": [
+   "民事勞動事件",
+   "勞工敗訴"
+  ],
+  "title": [
+   "職災須證明事故與因果",
+   "雇主已盡人因預防免責"
+  ],
+  "subtitle": [
+   "清潔員主張搬樹幹跌倒致腰椎突出",
+   "二審認證據不足，上訴駁回"
+  ],
+  "info": {
+   "cause": "請求給付職業災害補償等",
+   "date_pending": false
+  },
+  "parties": {
+   "plaintiff": {
+    "role": "上訴人／勞工",
+    "name": "趙○○",
+    "natural_person": true
+   },
+   "defendant": {
+    "role": "被上訴人／雇主",
+    "name": "臺北市政府環境保護局",
+    "natural_person": false
+   }
+  },
+  "basics": [
+   [
+    "職務",
+    "清潔隊員（清運垃圾、樹木）"
+   ],
+   [
+    "時間",
+    "92 年起任職，主張 106/6/1 事故"
+   ],
+   [
+    "月薪",
+    "判決未記載"
+   ],
+   [
+    "疾病",
+    "腰椎椎間盤突出及滑脫"
+   ]
+  ],
+  "relation": {
+   "claim": {
+    "label": "請求職災補償及賠償",
+    "note": "勞基法第 59 條、民法第 184、487 條之1"
+   },
+   "offset": {
+    "label": "無抵充",
+    "amount": "",
+    "note": "請求全部駁回"
+   },
+   "court": {
+    "role": "法院",
+    "name": "臺灣高等法院"
+   },
+   "order": {
+    "label": "上訴駁回",
+    "amount": "0 元"
+   }
+  },
+  "facts": [
+   {
+    "text": "92 年起任清潔員，100 年起清運垃圾、樹木",
+    "icon": "newhire"
+   },
+   {
+    "text": "主張 106/6/1 搬樹幹跌倒，同組證人未見",
+    "icon": "event"
+   },
+   {
+    "text": "6/6 就診，病歷未提及任何事故",
+    "icon": "check"
+   },
+   {
+    "text": "勞保局核定職業病失能給付 641,214 元",
+    "icon": "check"
+   },
+   {
+    "text": "雇主已訂人因計畫、發護具、年年訓練",
+    "icon": "course"
+   }
+  ],
+  "facts_anchor": "主張 106 年 6 月 1 日事故前後",
+  "timeline": {
+   "start": {
+    "date": "尚待確認",
+    "label": "到職",
+    "text": "社子分隊清潔員，3 人一組作業"
+   },
+   "onset": {
+    "date": "2017/06/06",
+    "label": "就診",
+    "text": "診斷腰椎椎間盤突出及滑脫（法院不認為職災）"
+   }
+  },
+  "result": {
+   "total": "0 元",
+   "notes": "上訴駁回；第二審訴訟費用由上訴人負擔",
+   "pending": "是否上訴第三審、是否確定，目前尚待確認",
+   "flow": {
+    "damage_label": "勞工請求",
+    "damage_total": "5,986,832 元",
+    "fault_op": "× 0%",
+    "fault_lines": [
+     "全部駁回",
+     "事故與因果未證明"
+    ],
+    "after_label": "法院認定",
+    "after_fault": "0 元",
+    "offset_op": "− 0 元",
+    "offset_lines": [
+     "本案無抵充"
+    ],
+    "final_label": "雇主應給付"
+   }
+  },
+  "sum_checks": [
+   {
+    "parts": [
+     "0",
+     "-0"
+    ],
+    "total": "0"
+   }
+  ],
+  "immutable_checks": [
+   "臺灣高等法院",
+   "115 年度勞上字第 31 號",
+   "5,986,832 元",
+   "641,214 元"
+  ],
+  "holdings": [
+   {
+    "head": "須證明事故確實發生",
+    "body": "病歷未提事故、同組證人未見",
+    "issue": "須證明事故確實發生？"
+   },
+   {
+    "head": "職業病意見不採",
+    "body": "憑片面陳述，年資未達認定指引",
+    "issue": "職業病意見不採？"
+   },
+   {
+    "head": "勞保核定不拘束法院",
+    "body": "民事法院可獨立認定職災",
+    "issue": "勞保核定不拘束法院？"
+   },
+   {
+    "head": "雇主已盡預防義務",
+    "body": "人因計畫、護具、訓練都有紀錄",
+    "issue": "雇主已盡預防義務？"
+   }
+  ],
+  "advisory": [
+   {
+    "head": "人因計畫留紀錄",
+    "body": "計畫、執行與檢討都要能提出"
+   },
+   {
+    "head": "護具發放簽收",
+    "body": "留存簽收、說明書與更換紀錄"
+   },
+   {
+    "head": "事故當下即時通報",
+    "body": "避免事後補述與病歷不一致"
+   },
+   {
+    "head": "勞保核定不等於賠償",
+    "body": "仍應另行評估民事風險"
+   }
+  ],
+  "advisory_icons": [
+   "search",
+   "group",
+   "bell",
+   "ledger"
+  ],
+  "source_card": {
+   "name": "司法院裁判書查詢系統",
+   "url": "judgment.judicial.gov.tw",
+   "how": "以法院及案號檢索"
+  },
+  "disclaimer": "本圖卡為案例摘要，個案仍應以正式判決書全文及最終裁判結果為準；本整理不構成任何法律意見，亦不保證內容正確性。",
+  "hero": {
+   "file": "overwork_night_desk.svg",
+   "hero_type": "construction",
+   "caption": "示意圖",
+   "origin": "浪板（鐵皮）工程施工、工作手套之示意，非事發現場、未繪人物"
+  },
+  "source_refs": {
+   "title": "測試資料",
+   "subtitle": "測試資料",
+   "tags": "測試資料",
+   "info": "測試資料",
+   "parties": "測試資料",
+   "basics": "測試資料",
+   "relation": "測試資料",
+   "facts": "測試資料",
+   "facts_anchor": "測試資料",
+   "timeline": "測試資料",
+   "result": "測試資料",
+   "sum_checks": "測試資料",
+   "holdings": "測試資料",
+   "advisory": "測試資料",
+   "hero": "測試資料",
+   "not_on_card": "測試資料"
+  },
+  "not_on_card": [
+   "人物臉孔、受傷畫面"
+  ]
+ }
+}

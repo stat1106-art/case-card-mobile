@@ -46,7 +46,7 @@ import re as _re
 for p in sorted(CASES.glob('*.json')):
     try: parties = (json.loads(p.read_text(encoding='utf-8')).get('card') or {}).get('parties') or {}
     except Exception: continue   # 壞掉的案例檔由 App 標示「讀不出來」
-    for who in parties.values():
+    for who in [x for v in parties.values() for x in (v if isinstance(v, list) else [v])]:   # 0.6.0：多方版是陣列
         if isinstance(who, dict) and who.get('natural_person') and not _re.fullmatch(r'[^○〇]{1,2}[○〇]{1,3}', str(who.get('name', ''))):
             raise SystemExit(f'{p.name} 的自然人姓名沒有遮好：{who.get("name")!r}（要寫成「羅○○」這種格式）')
 
@@ -154,7 +154,7 @@ pre = ['./'] + [p.relative_to(out).as_posix() for p in files if (not p.name.ends
 sw = (out / 'sw.js').read_text(encoding='utf-8').replace('__BUILD__', build).replace('__PRECACHE__', json.dumps(pre, ensure_ascii=False)).replace('__PLATFORM__', PLATFORM_VERSION)
 (out / 'sw.js').write_text(sw, encoding='utf-8')
 a = (out / 'js/app.js').read_text(encoding='utf-8').replace('__BUILD__', build); (out / 'js/app.js').write_text(a, encoding='utf-8')
-(out / 'version.json').write_text(json.dumps({'version': '0.5.3', 'build': build}), encoding='utf-8')
+(out / 'version.json').write_text(json.dumps({'version': '0.6.0', 'build': build}), encoding='utf-8')
 # 測試用的假案例（fixtures、test_ 開頭、testcases）與夾 <script> 的資料不得進網站
 for p in sorted(out.rglob('*')):
     rel = p.relative_to(out).as_posix()

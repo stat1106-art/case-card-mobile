@@ -26,7 +26,8 @@ var CardCheck = (function () {
     not_on_card: '不放入小卡的內容', result_flow: '計算依據', timeline: '時間軸',
     start: '到職', onset: '事故或發病', date: '日期', facts_anchor: '事實時間基準',
     advisory_icons: '建議圖示', display: '顯示設定', mask_natural_person_name: '姓名遮蔽設定',
-    show_issues: '爭點顯示設定', keep_together: '同列文字', band_color: '色帶顏色'
+    show_issues: '爭點顯示設定', keep_together: '同列文字', band_color: '色帶顏色',
+    plaintiffs: '原告', defendants: '被告', joint: '連帶註記', awards: '各原告判命金額', who: '對象', calc: '算式', total_label: '合計說明'
   };
   var own = function (o, k) { return Object.prototype.hasOwnProperty.call(o, k); };
   var object = function (o) { return o !== null && typeof o === 'object' && !Array.isArray(o); };
@@ -192,9 +193,29 @@ var CardCheck = (function () {
 
     var result = object(card.result) ? card.result : {};
     var flow = object(result.flow) ? result.flow : {};
+    // 0.6.0：多方當事人版（多位原告或多位被告，各原告各自判命金額）
+    var parties = object(card.parties) ? card.parties : {};
+    var multi = Array.isArray(parties.plaintiffs) || Array.isArray(parties.defendants);
+    if (multi) {
+      var P = Array.isArray(parties.plaintiffs) ? parties.plaintiffs : [], D = Array.isArray(parties.defendants) ? parties.defendants : [];
+      if (!Array.isArray(parties.plaintiffs) || !Array.isArray(parties.defendants) || P.length < 1 || P.length > 4 || D.length < 1 || D.length > 4 || P.length + D.length < 3) {
+        error('M11', '多方當事人版須列出原告 1～4 位、被告 1～4 位，且不是一對一（一對一請用一般版）；目前原告 ' + P.length + ' 位、被告 ' + D.length + ' 位。');
+      }
+      var awards = Array.isArray(result.awards) ? result.awards : [];
+      var mtotal = money(result.total, false);
+      if (!awards.length || awards.length > 4) error('M11', '多方當事人版須逐位列出各原告的判命金額（1～4 筆）。');
+      var values = awards.map(function (a) { return object(a) && filled(a.who) ? money(a.amount, false) : null; });
+      if (values.some(function (v) { return v === null; }) || mtotal === null) error('M11', '各原告判命金額或合計無法辨認，請填整數元，並寫明是哪一位原告。');
+      else {
+        var msum = values.reduce(function (a, b) { return a + b; }, 0n);
+        if (msum !== mtotal) error('M11', '各原告判命金額加總 ' + values.map(amount).join(' ＋ ') + ' ＝ ' + amount(msum) + '，不等於合計 ' + amount(mtotal) + '。');
+      }
+    }
     var hasFault = present(flow, 'fault_op') && (typeof flow.fault_op !== 'string' || flow.fault_op.trim() !== '');
     var hasOffset = present(flow, 'offset_op') && (typeof flow.offset_op !== 'string' || flow.offset_op.trim() !== '');
-    if (!hasFault && !hasOffset) {
+    if (multi) {
+      /* 多方版不用過失相抵／抵充流程，算式寫在各原告那一列 */
+    } else if (!hasFault && !hasOffset) {
       warn('M05', '沒有過失相抵與抵充的計算欄位，本次略過這段金額算式，請人工確認判命金額。');
     } else {
       var damage = money(flow.damage_total, false), ratio = percentage(flow.fault_op);
@@ -240,10 +261,17 @@ var CardCheck = (function () {
     }
 
     var unknownNames = [];
+    var partyList = [];
     if (object(card.parties)) Object.keys(card.parties).forEach(function (key) {
-      var party = card.parties[key];
+      var v = card.parties[key];
+      if (Array.isArray(v)) v.forEach(function (p, i) { partyList.push({ key: key, path: key + '.' + i, party: p, role: (own(LABELS, key) ? LABELS[key] : '當事人') + '第 ' + (i + 1) + ' 位' }); });
+      else partyList.push({ key: key, path: key, party: v, role: own(LABELS, key) ? LABELS[key] : '當事人' });
+    });
+    partyList.forEach(function (entry) {
+      var key = entry.key === 'plaintiffs' ? 'plaintiff' : (entry.key === 'defendants' ? 'defendant' : entry.key);
+      var party = entry.party;
       if (!object(party) || party.natural_person !== true) return;
-      var role = own(LABELS, key) ? LABELS[key] : '當事人';
+      var role = entry.role;
       var name = typeof party.name === 'string' ? party.name : '';
       var chars = Array.from(name);
       // 已遮蔽：開頭 1～2 個漢字（姓；複姓或冠夫姓留兩字，例：歐陽○○、李林○○），後面至少兩個○
@@ -253,7 +281,7 @@ var CardCheck = (function () {
         error('M07', role + '名字還沒遮好，請改成「' + example + '」這種姓加兩個以上空心圓的格式（複姓或冠夫姓可留兩字，例如「歐陽○○」「李林○○」）。');
         if (filled(name) && chars.length > 1 && !/[○〇◯●*]/u.test(name)) {
           leaves.forEach(function (leaf) {
-            if (leaf.keys.join('.') === 'card.parties.' + key + '.name') return;
+            if (leaf.keys.join('.') === 'card.parties.' + entry.path + '.name') return;
             if (leaf.text.indexOf(name) !== -1) error('M07', leaf.path + '也出現' + role + '的未遮姓名，請一併遮蔽。');
           });
         }

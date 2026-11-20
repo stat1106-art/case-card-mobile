@@ -49,7 +49,7 @@ try:
         ctx.on("request", lambda r: net.append(r.url))
         pg = ctx.new_page(); pg.goto(URL); pg.wait_for_selector("input[name=c]")
         pg.evaluate("navigator.serviceWorker.ready"); pg.reload(); pg.wait_for_selector("input[name=c]")
-        rec("版本 0.5.3", "版本 0.5.3" in pg.text_content("#ver"), pg.text_content("#ver"))
+        rec("版本 0.6.0", "版本 0.6.0" in pg.text_content("#ver"), pg.text_content("#ver"))
         # (a) 同仁畫面
         ok, hits = user_view_ok(pg); rec("(a) 同仁畫面看不到貼上框、沒有程式字眼", ok, hits)
         pg.screenshot(path=str(out / "a_user_view_iphone15.png"), full_page=True)

@@ -81,7 +81,8 @@ def check_cases():
             if not (hero_lib / hero["image"]).is_file(): probs.append(f"{f}：hero.image 指的圖 {hero['image']} 不在 hero_library/")
         elif hero.get("hero_type") not in HERO_TYPES:
             probs.append(f"{f}：hero.hero_type 要填 14 類之一（目前：{hero.get('hero_type')!r}）")
-        for who in (d["card"].get("parties") or {}).values():
+        _pv = (d["card"].get("parties") or {}).values()
+        for who in [x for v in _pv for x in (v if isinstance(v, list) else [v])]:   # 0.6.0：多方版是陣列
             if isinstance(who, dict) and who.get("natural_person") and not NAME_OK.fullmatch(str(who.get("name", ""))):
                 probs.append(f"{f}：自然人姓名沒遮好：{who.get('name')!r}")
         left = sorted({n for s in strings(d) for n, _ in candidates(s)})
@@ -134,6 +135,12 @@ def main():
         adm = work / "admin_out"; adm.mkdir()
         run([py, "-I", str(TESTS / "admin_test.py"), str(rd), str(adm), str(shilin), str(ref)], "同仁端／管理端驗收", "全部通過")
         run([py, "-I", str(TESTS / "hash_test.py"), str(rd)], "#case= 預選")
+    # 0.6.0：多方當事人版、勞工敗訴（0 元）版的範例另外打包（不部署），確認出圖、檢查都過
+    shp = HERE / "ci/shape_cases"; shs = work / "shape_site"
+    run(["node", str(TESTS / "shape_check_test.js"), str(REPO / "app_mobile/src/platform/js/check.js"), str(shp / "tcdv_114_zhonglaosu_10.json"), str(shp / "tphv_115_laoshang_31.json")],
+        "check.js 多方版／敗訴版規則（金額加總、陣列裡的姓名遮蔽、人數）", "全部通過")
+    if run([py, str(HERE / "build.py"), str(shs), "--cases", str(shp)], "多方版／敗訴版範例打包（不部署）"):
+        run([py, "-I", str(TESTS / "case_render_test.py"), str(serve_dir(work, "serve_shape", shs))], "多方版（2 對 3、4 對 3 長公司名）與敗訴版出圖檢查", "全部通過")
     return finish()
 
 
