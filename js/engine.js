@@ -63,6 +63,7 @@ function svg(name, size, color, stroke) {
     `stroke-width="${stroke}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
 }
 function maskName(name) {
+  if (/^[^○〇]{1,2}○{2,}$/u.test(name)) return name;   // 0.6.0：已遮好的（含複姓「歐陽○○」）原樣保留
   const a = Array.from(name);
   if (a.length <= 1) return name;
   if (a.length === 2) return a[0] + '○';
@@ -85,8 +86,11 @@ function buildClassic(c, draft, ref, A) {
   const E = makeE(d.keep_together || [], ew => `<span style="white-space: nowrap">${ew}</span>`);
   const K = c._skin_roles, band = K.dark;
   const info = c.info, rel = c.relation, r = c.result;
-  const pl = c.parties.plaintiff, df = c.parties.defendant;
-  const pl_name = (pl.natural_person && d.mask_natural_person_name) ? maskName(pl.name) : pl.name;
+  // 0.6.0：多方當事人（多原告、多被告連帶、各自判命金額）。parties.plaintiffs／defendants 是陣列時走多方版面。
+  const multi = Array.isArray(c.parties.plaintiffs) && Array.isArray(c.parties.defendants);
+  const nm = p => (p.natural_person && d.mask_natural_person_name) ? maskName(p.name) : p.name;
+  const pl = multi ? c.parties.plaintiffs[0] : c.parties.plaintiff, df = multi ? c.parties.defendants[0] : c.parties.defendant;
+  const pl_name = nm(pl);
   // 0.5.1：當事人名稱太長時自動分行、縮字（原本 7 字以上就會超出框；例：17 字的「…股份有限公司」）。原告、被告都適用（雇主告勞工時公司在原告側）。
   const chunk = (arr, n) => { const out = []; for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n).join('')); return out; };
   const wrapName = (name) => {
@@ -136,6 +140,45 @@ function buildClassic(c, draft, ref, A) {
       ${arrow(240, 182, 490, K.deduct, null, 'left')}
       <div style="position: absolute; left: 284px; top: 188px; width: 400px; text-align: center"><div style="font-size: 18px; line-height: 26px; font-weight: 700; color: ${K.deduct}">${E(rel.offset.label + ' ' + rel.offset.amount)}</div><div style="font-size: 18px; line-height: 26px; color: ${K.ink2}">${E('（' + rel.offset.note + '）')}</div></div>
     </div>`;
+  const relation_multi = () => {
+    const P = c.parties.plaintiffs, D = c.parties.defendants;
+    const rows = (n) => { const top = 34, bot = 230, h = (bot - top) / n; return Array.from({ length: n }, (_, i) => Math.round(top + h * i + h / 2)); };
+    const small = (left, cy, color, icon) => `<div style="position: absolute; left: ${left}px; top: ${cy - 18}px; width: 36px; height: 36px; border-radius: 50%; background: ${color}; color: ${K.on_dark}; display: flex; align-items: center; justify-content: center">${svg(icon, 20, null, 2)}</div>`;
+    // 每人一格：角色一行、名稱一行；名稱太長時角色與名稱合成一行並縮排換行（最多 2 行）
+    const who = (p, align, left, cy, w, n) => {
+      const name = nm(p), len = Array.from(name).length, perLine = Math.floor(w / 18);
+      const tight = n >= 3 && len > perLine - 2;
+      const nl = Math.ceil(len / perLine);
+      if (tight) return `<div style="position: absolute; left: ${left}px; top: ${cy - Math.round(21 * (1 + nl) / 2)}px; width: ${w}px; text-align: ${align}; font-size: 18px; line-height: 21px">`
+        + `<span style="color: ${K.muted}">${E(p.role)}</span><br><b>${E(name)}</b></div>`;
+      const lines = len > perLine ? 2 : 1;
+      return `<div style="position: absolute; left: ${left}px; top: ${cy - (12 + 12 * lines)}px; width: ${w}px; text-align: ${align}">`
+        + `<div style="font-size: 18px; line-height: 24px; color: ${K.muted}">${E(p.role)}</div>`
+        + `<div style="font-size: ${lines > 1 ? 18 : 20}px; line-height: ${lines > 1 ? 24 : 26}px; font-weight: 700">${E(name)}</div></div>`;
+    };
+    const pr = rows(P.length), dr = rows(D.length);
+    const left = P.map((p, i) => small(248, pr[i], K.plaintiff, 'person') + who(p, 'right', 16, pr[i], 222, P.length)).join('');
+    const right = D.map((p, i) => small(708, dr[i], K.defendant, p.natural_person ? 'person' : 'building') + who(p, 'left', 750, dr[i], 212, D.length)).join('');
+    const brk = (x, ys, color, side) => ys.length > 1
+      ? `<div style="position: absolute; left: ${x}px; top: ${ys[0] - 18}px; width: 10px; height: ${ys[ys.length - 1] - ys[0] + 36}px; border: 3px solid ${color}; border-${side}: 0; border-radius: ${side === 'left' ? '0 8px 8px 0' : '8px 0 0 8px'}"></div>` : '';
+    const midD = Math.round((dr[0] + dr[dr.length - 1]) / 2);
+    const joint = c.parties.joint && D.length > 1
+      ? `<div style="position: absolute; left: 640px; top: ${midD + 20}px; font-size: 18px; line-height: 26px; font-weight: 900; color: ${K.on_dark}; background: ${K.defendant}; border-radius: 6px; padding: 1px 7px">連帶</div>` : '';
+    const off = rel.offset && rel.offset.amount ? `<div style="font-size: 18px; line-height: 26px; color: ${K.deduct}; font-weight: 700">${E(rel.offset.label + ' ' + rel.offset.amount)}</div>` : '';
+    return `
+    <div class="box" style="position: relative; margin-top: 6px; height: 240px; background: ${K.card}; box-shadow: inset 0 0 0 1.5px ${K.line}; border-radius: 16px">
+      <div style="position: absolute; left: 334px; top: 6px; width: 300px; text-align: center; font-size: 20px; line-height: 28px"><span style="font-size: 18px; color: ${K.muted}">${E(rel.court.role)}　</span><b>${E(rel.court.name)}</b></div>
+      ${node(456, 38, K.dark, 'scale')}
+      ${left}${brk(292, pr, K.plaintiff, 'left')}${right}${brk(692, dr, K.defendant, 'right')}${joint}
+      ${arrow(306, 126, 158, K.plaintiff, -22)}
+      ${arrow(514, 68, 165, K.dark, 22)}
+      <div style="position: absolute; left: 326px; top: 112px; width: 316px; text-align: center">
+        <div style="font-size: 18px; line-height: 26px; font-weight: 700; color: ${K.plaintiff}">${E(rel.claim.label)}</div>
+        <div style="font-size: 18px; line-height: 26px; font-weight: 700">${E(rel.order.label)}</div>
+        <div class="amt" style="font-size: 22px; line-height: 30px; font-weight: 900">${E(rel.order.amount)}</div>${off}
+      </div>
+    </div>`;
+  };
   const op = (main, lines, size) => {
     const ls = lines.map(x => `<div style="font-size: 18px; line-height: 24px; color: ${K.ink2}">${E(x)}</div>`).join('');
     return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 6px">`
@@ -147,7 +190,18 @@ function buildClassic(c, draft, ref, A) {
       + `<div style="font-size: 18px; line-height: 26px; color: ${K.money_sub}">${E(label)}</div><div class="amt" style="font-size: 27px; line-height: 34px; font-weight: 900">${E(val)}</div></div>`
     : `<div style="background: ${K.card}; box-shadow: inset 0 0 0 1.5px ${K.line}; border-radius: 12px; padding: 10px 16px; display: flex; flex-direction: column; justify-content: center">`
       + `<div style="font-size: 18px; line-height: 26px; color: ${K.muted}">${E(label)}</div><div class="amt" style="font-size: 22px; line-height: 30px; font-weight: 900">${E(val)}</div></div>`;
-  const flow = valbox(fl.damage_label, fl.damage_total) + op(fl.fault_op, fl.fault_lines, 21) + valbox(fl.after_label, fl.after_fault) + op(fl.offset_op, fl.offset_lines, 20) + valbox(fl.final_label, r.total, true);
+  const flow = multi ? '' : valbox(fl.damage_label, fl.damage_total) + op(fl.fault_op, fl.fault_lines, 21) + valbox(fl.after_label, fl.after_fault) + op(fl.offset_op, fl.offset_lines, 20) + valbox(fl.final_label, r.total, true);
+  const awards = multi ? (() => {
+    const A2 = r.awards;
+    const rowsH = A2.map(a => `<div style="display: grid; grid-template-columns: 150px minmax(0, 1fr) 16px 150px; align-items: center; gap: 8px; padding: 3px 14px; background: ${K.card}; box-shadow: inset 0 0 0 1.5px ${K.line}; border-radius: 10px">`
+      + `<div style="font-size: 18px; line-height: 26px; font-weight: 900; color: ${K.plaintiff}; white-space: nowrap">${E(a.who)}</div>`
+      + `<div style="font-size: 18px; line-height: 26px; color: ${K.ink2}">${E(a.calc)}</div>`
+      + `<div style="width: 16px; height: 3px; background: ${K.deduct}; position: relative"><span style="position: absolute; right: -4px; top: -6px; border-top: 7.5px solid transparent; border-bottom: 7.5px solid transparent; border-left: 10px solid ${K.deduct}"></span></div>`
+      + `<div class="amt" style="font-size: 21px; line-height: 26px; font-weight: 900; text-align: right; white-space: nowrap">${E(a.amount)}</div></div>`).join('');
+    return `<div style="margin-top: 6px; display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 12px; align-items: stretch">`
+      + `<div style="display: flex; flex-direction: column; gap: 4px">${rowsH}</div>`
+      + valbox(r.total_label || '被告應給付合計', r.total, true) + `</div>`;
+  })() : '';
   const fact = f => {
     const [t, ic] = (f && typeof f === 'object') ? [f.text, f.icon || 'check'] : [f, 'check'];
     return `<div style="display: flex; gap: 10px; align-items: flex-start"><span style="flex: none; width: 38px; height: 38px; border-radius: 50%; background: ${K.dark}; color: ${K.on_dark}; display: flex; align-items: center; justify-content: center">${svg(ic, 22)}</span>`
@@ -185,11 +239,11 @@ html,body{margin:0;width:1080px;height:1620px;overflow:hidden;background:${K.pag
 
   <section id="s-info" class="box" data-overlap="ok" style="position: relative; flex: none; margin: -36px 56px 0; display: grid; grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.16fr) minmax(0, 0.92fr) minmax(0, 1fr); background: ${K.card}; border-radius: 14px; box-shadow: 0 0 0 1.5px ${K.line}">${infobar}</section>
 
-  <section id="s-rel" style="flex: none; margin: 0 56px"><h2 style="${h2}"><span class="chip" style="display: inline-block; background: ${K.dark}; color: ${K.on_dark}; border-radius: 6px; padding: 0 10px">法律關係圖</span></h2>${relation}</section>
+  <section id="s-rel" style="flex: none; margin: 0 56px"><h2 style="${h2}"><span class="chip" style="display: inline-block; background: ${K.dark}; color: ${K.on_dark}; border-radius: 6px; padding: 0 10px">法律關係圖</span></h2>${multi ? relation_multi() : relation}</section>
 
   <section id="s-result" style="flex: none; margin: 0 56px">
     <h2 style="${h2}; display: flex; justify-content: space-between; align-items: center"><span class="chip" style="display: inline-block; background: ${K.dark}; color: ${K.on_dark}; border-radius: 6px; padding: 0 10px">判決結果</span>${pill_court}</h2>
-    <div style="margin-top: 6px; display: grid; grid-template-columns: minmax(0, 1fr) 170px minmax(0, 1fr) 170px minmax(0, 1.2fr); align-items: stretch">${flow}</div>
+    ${multi ? awards : `<div style="margin-top: 6px; display: grid; grid-template-columns: minmax(0, 1fr) 170px minmax(0, 1fr) 170px minmax(0, 1.2fr); align-items: stretch">${flow}</div>`}
     <div style="margin-top: 8px; font-size: 18px; line-height: 27px; color: ${K.ink2}">${E(r.notes)}</div>
     <div class="pending" style="margin-top: 6px; background: #FDF1E6; box-shadow: inset 0 0 0 1.5px #EFC7A5; border-radius: 10px; padding: 5px 14px; font-size: 18px; line-height: 27px; color: #6B3A12"><b style="color: #B8540F">尚待確認｜</b>${E(r.pending)}</div>
   </section>
@@ -229,8 +283,11 @@ function buildLight(c, draft, ref, A) {
   const E = makeE(d.keep_together || [], ew => `<span style="white-space: nowrap">${ew}</span>`);
   const NAVY = '#23466E', TEAL = '#0F8070', SLATE = '#4F5D6B', AMBER = '#C47A12', PLUM = '#6A4B95';
   const info = c.info, rel = c.relation, r = c.result, fl = c.result.flow;
-  const pl = c.parties.plaintiff, df = c.parties.defendant;
-  const pl_name = (pl.natural_person && d.mask_natural_person_name) ? maskName(pl.name) : pl.name;
+  // 0.6.0：多方當事人（多原告、多被告連帶、各自判命金額）。parties.plaintiffs／defendants 是陣列時走多方版面。
+  const multi = Array.isArray(c.parties.plaintiffs) && Array.isArray(c.parties.defendants);
+  const nm = p => (p.natural_person && d.mask_natural_person_name) ? maskName(p.name) : p.name;
+  const pl = multi ? c.parties.plaintiffs[0] : c.parties.plaintiff, df = multi ? c.parties.defendants[0] : c.parties.defendant;
+  const pl_name = nm(pl);
   const font_url = ref('NotoSansTC-VF.ttf');
   const hero_svg = A.heroSvg || '';
   const draft_badge = draft ? '<span id="draftbadge" style="position: absolute; left: 14px; top: 14px; font-size: 18px; line-height: 24px; font-weight: 700; color: #8A3B12; background: #FDF1E6; border: 1.5px solid #E3A36F; border-radius: 8px; padding: 4px 10px">草稿｜法院內容尚未對照原始分析</span>' : '';
@@ -304,7 +361,7 @@ html,body{margin:0;width:1080px;height:1620px;overflow:hidden;background:#F2F5F8
   <section id="s-rel" style="flex: none; margin: 0 56px"><h2 style="${h2}">法律關係圖</h2>${relation}</section>
   <section id="s-result" style="flex: none; margin: 0 56px">
     <h2 style="${h2}; display: flex; justify-content: space-between; align-items: center">判決結果${pill}</h2>
-    <div style="margin-top: 6px; display: grid; grid-template-columns: minmax(0, 1fr) 170px minmax(0, 1fr) 170px minmax(0, 1.2fr); align-items: stretch">${flow}</div>
+    ${multi ? awards : `<div style="margin-top: 6px; display: grid; grid-template-columns: minmax(0, 1fr) 170px minmax(0, 1fr) 170px minmax(0, 1.2fr); align-items: stretch">${flow}</div>`}
     <div style="margin-top: 8px; font-size: 18px; line-height: 27px; color: #33424F">${E(r.notes)}</div>
     <div class="pending" style="margin-top: 6px; display: flex; gap: 8px; align-items: center; background: #FBEBD3; border-radius: 10px; padding: 5px 14px; font-size: 18px; line-height: 27px; color: #6E4206">${svg('alert', 20, '#A86508')}<span><b style="color: #A86508">尚待確認｜</b>${E(r.pending)}</span></div>
   </section>
@@ -550,6 +607,15 @@ function contentChecks(c) {
     } catch (e) { dmg = aft = rate = null; }
     if (rate === null || dmg === null) out.push(['C04 損害合計 × 過失比例 等於過失相抵後金額', false, '金額流程格式無法讀取（damage_total／after_fault／fault_op 的百分比）']);
     else out.push(['C04 損害合計 × 過失比例 等於過失相抵後金額', Math.round(dmg * rate) === aft, `${fmtInt(dmg)} × ${fmtG(rate)} = ${(dmg * rate).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}；標示 ${fmtInt(aft)}`]);
+  }
+  const pt = c.parties || {};
+  if (Array.isArray(pt.plaintiffs) || Array.isArray(pt.defendants)) {
+    const P = pt.plaintiffs || [], D = pt.defendants || [], aw = ((c.result || {}).awards) || [];
+    const okShape = Array.isArray(pt.plaintiffs) && Array.isArray(pt.defendants) && P.length >= 1 && P.length <= 4 && D.length >= 1 && D.length <= 4 && (P.length + D.length) >= 3;
+    out.push(['C05 多方當事人人數 1～4 位、且不是一對一', okShape, `原告 ${P.length} 位、被告 ${D.length} 位`]);
+    let sum = null, tot = null;
+    try { sum = aw.reduce((a, x) => a + pyInt(String(x.amount).replace(/[,\s]/g, '').replace(/元$/, '')), 0); tot = pyInt(String((c.result || {}).total).replace(/[,\s]/g, '').replace(/元$/, '')); } catch (e) { sum = tot = null; }
+    out.push(['C06 各原告判命金額加總等於合計', aw.length >= 1 && aw.length <= 4 && sum !== null && sum === tot, sum === null ? '金額格式無法讀取（awards／total 須為整數元）' : `${aw.map(x => x.amount).join(' + ')} = ${fmtInt(sum)}；合計 ${(c.result || {}).total}`]);
   }
   const n_src = (c.source_card && typeof c.source_card === 'object' && !Array.isArray(c.source_card)) ? 1 : 0;
   out.push(['C03 單一來源卡', n_src === 1, `來源卡數 ${n_src}`]);

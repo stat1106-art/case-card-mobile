@@ -3,7 +3,7 @@ var PF = (function () {
   'use strict';
   // 讓 App 知道這個分頁是從平台過去的（App 才顯示「← 回案例清單」）
   try { sessionStorage.setItem('pf_visited', '1'); } catch (e) { /* 讀寫不到就算了 */ }
-  var VERSION = '0.1.8';
+  var VERSION = '0.1.9';
   var BROKEN = '這個案例讀不出來';
   var REVIEW_ITEMS = [['source', '來源'], ['interpretation', '解讀'], ['amounts', '金額'], ['privacy', '個資遮蔽']];
 

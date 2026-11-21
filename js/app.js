@@ -3,8 +3,8 @@
 'use strict';
 // 0.5.3：「← 回案例清單」只給從平台點進來的人看（平台各頁會在這個分頁留記號）；客戶直接打開 App 看不到，不會被帶進同仁用的平台
 try { if (sessionStorage.getItem('pf_visited') === '1') { const bl = document.getElementById('backlink'); if (bl) bl.hidden = false; } } catch (e) { /* 私密模式等讀不到就不顯示 */ }
-const APP_VERSION = '0.5.3';
-const BUILD = '3588fe7cf6';
+const APP_VERSION = '0.6.0';
+const BUILD = 'a45c013451';
 // 壞檔在清單上的標示（驗收第 10 條的用字）；要換字只改這裡
 const BROKEN_LABEL = '這個案例讀不出來';
 const DISCLAIMER = '案例內容由 AI 整理，正式使用前請自己對照判決核對。';
